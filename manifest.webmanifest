@@ -1,0 +1,8 @@
+{
+  "name": "Gastos",
+  "short_name": "Gastos",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#edf1ef",
+  "theme_color": "#0b6b4d"
+}

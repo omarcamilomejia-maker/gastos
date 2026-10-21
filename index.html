@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gastos">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Prueba fase 0 B</title>
+<style>
+  body{font:16px -apple-system,system-ui,sans-serif;margin:0;padding:1.2rem;padding-top:calc(1.2rem + env(safe-area-inset-top));background:#edf1ef;color:#11201a}
+  h1{font-size:1.3rem;margin:0 0 .8rem}
+  label{display:block;font-size:.8rem;color:#46574f;margin:.7rem 0 .2rem}
+  input,select{width:100%;box-sizing:border-box;padding:.75rem;font-size:1rem;border:1px solid #c8d4ce;border-radius:.5rem;background:#fff}
+  button{display:block;width:100%;padding:.9rem;margin:.7rem 0;border:0;border-radius:.7rem;background:#0b6b4d;color:#fff;font-size:1rem;font-weight:600}
+  button.sec{background:#46574f}
+  pre{background:#fff;padding:.8rem;border-radius:.5rem;white-space:pre-wrap;word-break:break-word;font-size:.85rem}
+  details{margin:.6rem 0}
+</style>
+</head>
+<body>
+<h1>Prueba fase 0 · ruta B</h1>
+
+<details id="cfg" open>
+  <summary>Configuración (se guarda en este dispositivo)</summary>
+  <label for="url">URL del Apps Script (/exec)</label>
+  <input id="url" type="url" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <label for="llave">Llave</label>
+  <input id="llave" type="password" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <button class="sec" id="guardar">Guardar configuración</button>
+</details>
+
+<button id="ping">1. Probar conexión con llave</button>
+
+<label for="valor">Valor</label>
+<input id="valor" type="number" inputmode="numeric" placeholder="35000">
+<label for="cat">Categoría</label>
+<select id="cat"><option>Taxi o Uber</option><option>Plaza</option><option>Supermercado</option><option>Otro</option></select>
+<button id="enviar">2. Enviar gasto de prueba</button>
+
+<button class="sec" id="info">3. ¿Estoy en modo pantalla de inicio?</button>
+
+<pre id="out">Listo.</pre>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const out = $('out');
+  const log = t => out.textContent = t;
+
+  function leer(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function escribir(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+
+  $('url').value = leer('p0_url');
+  $('llave').value = leer('p0_llave');
+  if ($('url').value && $('llave').value) $('cfg').open = false;
+
+  $('guardar').onclick = () => {
+    const ok = escribir('p0_url', $('url').value.trim()) && escribir('p0_llave', $('llave').value.trim());
+    log(ok ? 'Configuración guardada en este dispositivo.' : 'No se pudo guardar (almacenamiento bloqueado).');
+  };
+
+  async function llamar(opts) {
+    const t0 = performance.now();
+    const r = await fetch(opts.url, opts.init);
+    const j = await r.json();
+    return { j, ms: Math.round(performance.now() - t0) };
+  }
+
+  $('ping').onclick = async () => {
+    const url = leer('p0_url'), llave = leer('p0_llave');
+    if (!url || !llave) return log('Primero guarde URL y llave.');
+    log('Consultando...');
+    try {
+      const { j, ms } = await llamar({ url: url + '?accion=ping&llave=' + encodeURIComponent(llave), init: {} });
+      log('Respuesta (' + ms + ' ms)\n' + JSON.stringify(j, null, 2));
+    } catch (e) { log('Falló: ' + e.message); }
+  };
+
+  $('enviar').onclick = async () => {
+    const url = leer('p0_url'), llave = leer('p0_llave');
+    const valor = Number($('valor').value);
+    if (!url || !llave) return log('Primero guarde URL y llave.');
+    if (!(valor > 0)) return log('Escriba un valor mayor que cero.');
+    const id = 'web-' + Date.now();
+    log('Enviando...');
+    try {
+      // text/plain evita la petición previa de CORS, que Apps Script no soporta.
+      const { j, ms } = await llamar({
+        url,
+        init: {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ llave, id, valor, categoria: $('cat').value, medio: 'Efectivo', origen: 'pagina' })
+        }
+      });
+      log('Respuesta (' + ms + ' ms)\n' + JSON.stringify(j, null, 2));
+    } catch (e) { log('Falló: ' + e.message); }
+  };
+
+  $('info').onclick = () => {
+    log('standalone: ' + (window.navigator.standalone === true) +
+        '\nURL guardada: ' + (leer('p0_url') ? 'sí' : 'no') +
+        '\nLlave guardada: ' + (leer('p0_llave') ? 'sí' : 'no') +
+        '\nHora: ' + new Date().toLocaleString());
+  };
+</script>
+</body>
+</html>
