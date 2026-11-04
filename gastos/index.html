@@ -4,15 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Gastos">
+<meta name="apple-mobile-web-app-title" content="Expenses">
+<meta name="theme-color" content="#16304f">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Gastos</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Ocarisa Expenses</title>
 <style>
-:root{color-scheme:light;--bg:#f6f8f7;--surface:#fff;--ink:#11201a;--ink2:#52625b;--rule:#d7e0db;--acc:#0b6b4d;--acc-t:#d6ede2;--on:#fff;--key:#e9eeeb;--crit:#c2362f;--warn:#8f5100;--warn-t:#f4e5c7;--s1:#0b6b4d;--s2:#8aa39a;--grid:#e1e6e3}
-@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0f1713;--surface:#16211c;--ink:#e4ede8;--ink2:#9db1a8;--rule:#26352f;--acc:#3fd39c;--acc-t:#133a2c;--on:#06110c;--key:#1c2924;--crit:#ef6a62;--warn:#e5a93d;--warn-t:#3a2c10;--s1:#3fd39c;--s2:#5c7a6e;--grid:#26352f}}
+:root{color-scheme:light;--bg:#eef1f5;--surface:#fff;--ink:#16202c;--ink2:#566474;--rule:#d5dce5;--acc:#2b5282;--acc-t:#dbe5f1;--on:#fff;--key:#e6ebf1;--crit:#c2362f;--warn:#8f5100;--warn-t:#f4e5c7;--s1:#2b5282;--s2:#9aa9bb;--grid:#e1e6ec;--sp1:#2b5282;--sp2:#16304f;--good:#5be39b}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0e141b;--surface:#16202c;--ink:#e6ecf3;--ink2:#9fb0c2;--rule:#263445;--acc:#7fb0e6;--acc-t:#1a2f48;--on:#08121d;--key:#1d2a3a;--crit:#ef6a62;--warn:#e5a93d;--warn-t:#3a2c10;--s1:#7fb0e6;--s2:#5c6f85;--grid:#263445}}
+/* portada animada (método Ocari: anillo de cinco pasos) */
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(180deg,var(--sp1),var(--sp2));color:#fff;transition:opacity .5s;font-family:Poppins,system-ui,sans-serif;padding:20px;text-align:center}
+#splash.off{opacity:0;pointer-events:none}
+.sp-logo{width:176px;height:176px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+.sp-ring{transform-origin:50px 50px;animation:giro 10s linear infinite}
+.sp-orb{transform-origin:50px 50px;animation:giro 3.4s linear infinite}
+@keyframes giro{to{transform:rotate(360deg)}}
+.sp-bar{fill:#b7c6d9;transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(.15);animation:crece 1.5s cubic-bezier(.3,.7,.3,1) forwards,colorbar 2.4s ease-in-out infinite both}
+.sp-bar.b2{animation-delay:.25s,.15s}.sp-bar.b3{animation-delay:.5s,.3s}
+@keyframes crece{to{transform:scaleY(1)}}
+@keyframes colorbar{0%{fill:#b7c6d9}45%{fill:#7fe0ae}100%{fill:#fff}}
+.sp-name{font-family:'Dancing Script','Brush Script MT',cursive;font-weight:600;font-size:2.8rem;letter-spacing:.01em;line-height:1.05;margin-top:2px}
+.sp-app{font-weight:600;letter-spacing:.2em;text-transform:uppercase;font-size:.82rem;opacity:.95}
+.sp-lema{font-weight:300;font-size:.82rem;opacity:.8}
+.sp-pasos{display:flex;gap:6px;margin-top:10px}
+.sp-pasos span{width:37px;height:37px;border-radius:50%;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.55);color:rgba(255,255,255,.8);display:grid;place-items:center;font-weight:600;font-size:1.05rem;opacity:0;transform:translateX(170px);animation:entra .55s cubic-bezier(.2,.8,.2,1) forwards,paso .4s ease forwards}
+@keyframes entra{to{opacity:1;transform:none}}
+@keyframes paso{to{color:var(--sp2);background:rgba(255,255,255,.93);border-color:#fff}}
+.sp-pasos span:nth-child(1){animation-delay:0s,.6s}.sp-pasos span:nth-child(2){animation-delay:.14s,.76s}.sp-pasos span:nth-child(3){animation-delay:.28s,.92s}.sp-pasos span:nth-child(4){animation-delay:.42s,1.08s}.sp-pasos span:nth-child(5){animation-delay:.56s,1.24s}.sp-pasos span:nth-child(6){animation-delay:.7s,1.4s}.sp-pasos span:nth-child(7){animation-delay:.84s,1.56s}
+.sp-enter{margin-top:22px;border:0;background:rgba(255,255,255,.93);color:var(--sp2);font:600 .95rem Poppins,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 2.6rem;border-radius:999px;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease,background .2s;-webkit-user-select:none;user-select:none}
+.sp-enter.on{opacity:1;visibility:visible;transform:none;animation:latido 2.4s ease-in-out .8s infinite}
+.sp-enter:active{background:#fff;transform:scale(.97)}
+@keyframes latido{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.35)}50%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
+@media (prefers-reduced-motion:reduce){.sp-ring,.sp-orb{animation:none}}
+.ldr{display:flex;gap:8px;justify-content:center;padding:14px 0}.ldr i{width:11px;height:11px;border-radius:50%;background:var(--acc);opacity:.25;animation:late 1.1s ease-in-out infinite}
+.ldr i:nth-child(2){animation-delay:.15s}.ldr i:nth-child(3){animation-delay:.3s}.ldr i:nth-child(4){animation-delay:.45s}.ldr i:nth-child(5){animation-delay:.6s}
+@keyframes late{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom));touch-action:manipulation}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Poppins,system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom));touch-action:manipulation}
 button,.chip,label,select,input{touch-action:manipulation}
 .wrap{max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 14px 0;display:grid;gap:9px}
 .pg{display:none}.pg.on{display:grid;gap:9px}
@@ -73,6 +105,18 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
 </style>
 </head>
 <body>
+<div id="splash" role="img" aria-label="Ocarisa Group, Expenses">
+  <svg class="sp-logo" viewBox="0 0 100 100" aria-hidden="true">
+    <g class="sp-ring"><path d="M 80.07 39.06 A 32 32 0 1 1 66 22.29" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/></g>
+    <g class="sp-orb"><circle cx="74.51" cy="29.43" r="4.2" fill="#a9bdd4"/></g>
+    <rect class="sp-bar b1" x="36" y="52" width="7" height="12" rx="2"/><rect class="sp-bar b2" x="47" y="44" width="7" height="20" rx="2"/><rect class="sp-bar b3" x="58" y="34" width="7" height="30" rx="2"/>
+  </svg>
+  <div class="sp-name">Ocarisa Group</div>
+  <div class="sp-app">Expenses</div>
+  <div class="sp-lema">Organize your spending.</div>
+  <div class="sp-pasos" aria-hidden="true"><span>O</span><span>C</span><span>A</span><span>R</span><span>I</span><span>S</span><span>A</span></div>
+  <button class="sp-enter" id="enter" type="button">Ingresar</button>
+</div>
 <div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
 
 <div class="wrap">
@@ -108,7 +152,7 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
     <div><label for="aper">Periodo</label><select id="aper"></select></div>
     <div><label for="agrp">Grupo</label><select id="agrp"></select></div></div></div>
   <div class="card"><h2>Resumen</h2><div class="kpi" id="akpi"></div><div class="msg" id="amsg"></div></div>
-  <div class="card"><h2>Hallazgos</h2><div id="hall"></div></div>
+  <div class="card"><h2>Observaciones</h2><div id="hall"></div></div>
   <div class="card"><h2>Gasto por mes</h2><p class="hint">Toque una barra para elegir ese mes.</p><div id="ch-mes"></div></div>
   <div class="card" id="c-acum"><h2>Acumulado del mes contra el anterior</h2><div class="leg"><span><i style="background:var(--s1)"></i>Este mes</span><span><i style="background:var(--s2)"></i>Mes anterior</span></div><div id="ch-acum"></div></div>
   <div class="card"><h2>Por categoría</h2><p class="hint" id="cat-h"></p><div id="ch-cat"></div></div>
@@ -135,6 +179,8 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
     <button class="save sec" id="ping">Probar conexión</button>
     <div style="height:6px"></div>
     <button class="save sec" id="bloq">Bloquear ahora</button>
+    <div style="height:6px"></div>
+    <button class="save sec" id="snd" type="button">Sonido de bienvenida</button>
     <div class="msg" id="mcfg"></div></div>
 </section>
 </div>
@@ -144,6 +190,15 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
 <script>
 const PFX="g";
 const $=id=>document.getElementById(id);
+const LDR='<div class="ldr" aria-label="Cargando"><i></i><i></i><i></i><i></i><i></i></div>';
+const splashT0=Date.now();
+/* Portada: se queda en pantalla hasta que la persona toca «Ingresar». Solo entonces aparece el teclado del PIN. */
+function sonidoOk(){if(rd(PFX+"_snd")==="0")return;try{const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),t=ctx.currentTime;
+  const nota=(f,t0,d,v)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.012);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(ctx.destination);o.start(t0);o.stop(t0+d+.03)};
+  nota(660,t,.2,.16);nota(990,t+.09,.3,.14);nota(1320,t+.18,.45,.11);setTimeout(()=>{try{ctx.close()}catch(e){}},1100)}catch(e){}}
+function quitaSplash(){const s=$("splash"),b=$("enter");if(!s||!b)return;b.textContent=rd(PFX+"_llavec")?"Ingresar":"Comenzar";
+  const t=Math.max(0,2500-(Date.now()-splashT0));setTimeout(()=>b.classList.add("on"),t)}
+$("enter").onclick=()=>{sonidoOk();const s=$("splash");s.classList.add("off");setTimeout(()=>s.remove(),600)};
 const rd=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const rm=k=>{try{localStorage.removeItem(k)}catch(e){}};
@@ -283,6 +338,7 @@ function limpia(){v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").va
 /* ---- Hoy ---- */
 async function hoy(){
   $("hfecha").textContent=new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"});
+  $("hlist").innerHTML=LDR;
   try{const n=await vaciarCola();if(n)$("hmsg").textContent=n+" movimiento(s) de la cola enviados."}catch(e){}
   try{const r=await get("recientes"),h=iso(new Date());
     const dia=r.movimientos.filter(m=>m.fecha===h&&m.tipo==="Gasto");
@@ -342,7 +398,7 @@ function chAcum(rowsA,rowsB,ndias){
   $("ch-acum").innerHTML=s+"</svg>";
 }
 async function analisis(){
-  $("amsg").textContent="";
+  $("amsg").textContent="";if(!MOV)$("akpi").innerHTML=LDR;
   try{await cargaMov()}catch(e){$("amsg").textContent=e.message;$("amsg").className="msg err";return}
   $("amsg").className="msg";armaFiltros();
   const hoyD=new Date(),cur=hoyD.getFullYear()*12+hoyD.getMonth()+1,mins=Math.min.apply(null,MOV.map(m=>m.mi));
@@ -380,7 +436,7 @@ function hallazgos(c){
   if(c.corteMesActual){
     const dm=new Date(Math.floor((c.a-1)/12),(c.a-1)%12+1,0).getDate(),t=c.hoyD.getDate(),rest=dm-t;
     const rec=c.G.filter(r=>r.d>t-14),base=t>=14?sum(rec)/14:c.gt/Math.max(1,t);
-    L.push(`<b>Proyección de cierre del mes:</b> entre ${cmp(c.gt+base*rest*0.8)} y ${cmp(c.gt+base*rest*1.2)}, con un ritmo reciente de ${cmp(base)} por día. La proyección mejora a medida que hay más registros.`);
+    L.push(`<b>Referencia de cierre del mes:</b> entre ${cmp(c.gt+base*rest*0.8)} y ${cmp(c.gt+base*rest*1.2)}, con un ritmo reciente de ${cmp(base)} por día. Es una estimación y mejora a medida que hay más registros.`);
     const prevTot=sum(c.inR(c.pa,c.pa,r=>r.t==="G"&&(!c.grp||r.g===c.grp)));if(prevTot)L.push(`El mes anterior cerró en ${cmp(prevTot)}.`);
   }
   if(c.unMes){ // contra el promedio de los 6 meses previos (mismo corte si es el mes en curso)
@@ -426,6 +482,8 @@ $("gcfg").onclick=async()=>{
 $("ping").onclick=async()=>{const m=$("mcfg");m.className="msg";m.textContent="Probando...";try{const t=performance.now();await get("ping");m.textContent="Conexión correcta ("+Math.round(performance.now()-t)+" ms)";m.className="msg ok"}catch(e){m.textContent=e.message;m.className="msg err"}};
 $("bloq").onclick=()=>{if(rd(PFX+"_llavec"))bloquear();else{$("mcfg").className="msg err";$("mcfg").textContent="Aún no hay PIN configurado"}};
 $("url").value=rd(PFX+"_url");
+const sndLbl=()=>{$("snd").textContent="Sonido de bienvenida: "+(rd(PFX+"_snd")==="0"?"desactivado":"activado")};
+$("snd").onclick=()=>{wr(PFX+"_snd",rd(PFX+"_snd")==="0"?"1":"0");sndLbl();if(rd(PFX+"_snd")!=="0")sonidoOk()};sndLbl();
 
 function iniciaApp(){pintaBtns();cargaCatalogo();vaciarCola().catch(()=>{});irA("reg")}
 (function arranque(){
@@ -433,6 +491,7 @@ function iniciaApp(){pintaBtns();cargaCatalogo();vaciarCola().catch(()=>{});irA(
   if(rd(PFX+"_llavec"))lockMostrar("entrar");
   else if(rd(PFX+"_llave")&&rd(PFX+"_url")&&cripto)lockMostrar("crear"),lmsg("Proteja la app con un PIN. La llave quedará cifrada.");
   else irA("cfg");
+  quitaSplash();
 })();
 </script>
 </body>
