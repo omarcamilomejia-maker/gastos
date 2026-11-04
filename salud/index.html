@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-04.4">
+<meta name="app-version" content="2026-11-04.5">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -23,13 +23,12 @@
 .sp-ring{transform-origin:50px 50px;animation:giro 10s linear infinite}
 .sp-orb{transform-origin:50px 50px;animation:giro 3.4s linear infinite}
 @keyframes giro{to{transform:rotate(360deg)}}
-.sp-pulso{stroke-dasharray:1;stroke-dashoffset:1;animation:trazo 1.3s ease-out .25s forwards,colorp 1.3s linear .25s forwards}
-@keyframes trazo{to{stroke-dashoffset:0}}
-@keyframes colorp{0%{stroke:#fff}50%{stroke:#a6e4ff}100%{stroke:#fff}}
-@keyframes apaga{to{opacity:0}}
-.sp-chulo{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transform-box:fill-box;transform-origin:50% 100%;animation:aparece .01s linear 1.55s forwards,trazo .5s ease-out 1.55s forwards,rebote .4s ease-out 2.05s}
-@keyframes rebote{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
-@keyframes aparece{to{opacity:1}}
+/* electro que corre en bucle: un trazo luminoso recorre la onda con cambio de colores y, al llegar al final, aparece el chulo verde */
+.sp-corre{stroke-dasharray:.3 1.3;stroke-dashoffset:.3;animation:corre 3.6s linear infinite,colorp 3.6s linear infinite}
+@keyframes corre{0%{stroke-dashoffset:.3}55%{stroke-dashoffset:-1.05}100%{stroke-dashoffset:-1.05}}
+@keyframes colorp{0%{stroke:#fff}18%{stroke:#a6e4ff}36%{stroke:#7fe6b8}54%{stroke:#ffe9a0}72%{stroke:#a6e4ff}100%{stroke:#fff}}
+.sp-chulo{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transform-box:fill-box;transform-origin:50% 100%;animation:chulo 3.6s ease-out infinite}
+@keyframes chulo{0%,50%{opacity:0;stroke-dashoffset:1;transform:scale(1)}51%{opacity:1;stroke-dashoffset:1}60%{opacity:1;stroke-dashoffset:0;transform:scale(1)}66%{opacity:1;stroke-dashoffset:0;transform:scale(1.2)}72%{opacity:1;stroke-dashoffset:0;transform:scale(1)}92%{opacity:1;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}
 .sp-name{font-family:'Dancing Script','Brush Script MT',cursive;font-weight:600;font-size:2.8rem;letter-spacing:.01em;line-height:1.05;margin-top:2px}
 .sp-app{font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.82rem;opacity:.95}
 .sp-lema{font-weight:300;font-size:.82rem;opacity:.8}
@@ -99,7 +98,8 @@ input[type=file]{padding:.4rem}
   <svg class="sp-logo" viewBox="0 0 100 100" aria-hidden="true">
     <g class="sp-ring"><path d="M 80.07 39.06 A 32 32 0 1 1 66 22.29" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/></g>
     <g class="sp-orb"><circle cx="74.51" cy="29.43" r="4.2" fill="#a9bdd4"/></g>
-    <polyline class="sp-pulso" pathLength="1" points="24,52 33,52 37,44 42,62 48,34 54,57 58,48 62,52" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="24,52 33,52 37,44 42,62 48,34 54,57 58,48 62,52" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline class="sp-corre" pathLength="1" points="24,52 33,52 37,44 42,62 48,34 54,57 58,48 62,52" fill="none" stroke="#fff" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
     <polyline class="sp-chulo" pathLength="1" points="62,52 67,58 75,43" fill="none" stroke="#5be39b" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
   <div class="sp-name">Ocarisa Group</div>
@@ -194,7 +194,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-l");if(!els.length)return;ldrN=(ldrN+1)%11;
   els.forEach(el=>{for(let j=0;j<7;j++)el.children[j].classList.toggle("on",j>=7-Math.min(ldrN,7))})},170);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-04.4";
+const APP_V="2026-11-04.5";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
