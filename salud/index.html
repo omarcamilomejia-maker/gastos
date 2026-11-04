@@ -4,16 +4,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Salud">
+<meta name="apple-mobile-web-app-title" content="Health">
+<meta name="theme-color" content="#1f6a9f">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Salud</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Ocarisa Health &amp; Wellness</title>
 <style>
-:root{color-scheme:light;--bg:#eef2f7;--surface:#fff;--ink:#14202e;--ink2:#4d5c6e;--rule:#d3dce6;--acc:#1f5fa8;--acc-t:#dbe8f6;--on:#fff;--key:#e4eaf1;
-  --s1:#1f5fa8;--s2:#e08a2e;--s3:#8aa0b8;--crit:#c2362f;--good:#2e7d4f;--grid:#dde4ec;}
+:root{color-scheme:light;--bg:#edf3f8;--surface:#fff;--ink:#14202e;--ink2:#4d5c6e;--rule:#d3dfe9;--acc:#2a7fb8;--acc-t:#dbeaf5;--on:#fff;--key:#e4ecf3;
+  --s1:#2a7fb8;--s2:#e08a2e;--s3:#8aa0b8;--crit:#c2362f;--good:#2e7d4f;--grid:#dde6ee;--sp1:#3a93cf;--sp2:#1f6a9f;}
+/* portada animada (método Ocari: anillo de cinco pasos) */
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(180deg,var(--sp1),var(--sp2));color:#fff;transition:opacity .5s;font-family:Poppins,system-ui,sans-serif;padding:20px;text-align:center}
+#splash.off{opacity:0;pointer-events:none}
+.sp-logo{width:176px;height:176px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+.sp-ring{transform-origin:50px 50px;animation:giro 10s linear infinite}
+.sp-orb{transform-origin:50px 50px;animation:giro 3.4s linear infinite}
+@keyframes giro{to{transform:rotate(360deg)}}
+.sp-pulso{stroke-dasharray:1;stroke-dashoffset:1;animation:trazo 1.3s ease-out .25s forwards,colorp 1.3s linear .25s forwards}
+@keyframes trazo{to{stroke-dashoffset:0}}
+@keyframes colorp{0%{stroke:#fff}50%{stroke:#a6e4ff}100%{stroke:#fff}}
+@keyframes apaga{to{opacity:0}}
+.sp-chulo{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transform-box:fill-box;transform-origin:50% 100%;animation:aparece .01s linear 1.55s forwards,trazo .5s ease-out 1.55s forwards,rebote .4s ease-out 2.05s}
+@keyframes rebote{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes aparece{to{opacity:1}}
+.sp-name{font-family:'Dancing Script','Brush Script MT',cursive;font-weight:600;font-size:2.8rem;letter-spacing:.01em;line-height:1.05;margin-top:2px}
+.sp-app{font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.82rem;opacity:.95}
+.sp-lema{font-weight:300;font-size:.82rem;opacity:.8}
+.sp-pasos{display:flex;gap:6px;margin-top:10px}
+.sp-pasos span{width:37px;height:37px;border-radius:50%;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.55);color:rgba(255,255,255,.8);display:grid;place-items:center;font-weight:600;font-size:1.05rem;opacity:0;transform:translateX(170px);animation:entra .55s cubic-bezier(.2,.8,.2,1) forwards,paso .4s ease forwards}
+@keyframes entra{to{opacity:1;transform:none}}
+@keyframes paso{to{color:var(--sp2);background:rgba(255,255,255,.93);border-color:#fff}}
+.sp-pasos span:nth-child(1){animation-delay:0s,.6s}.sp-pasos span:nth-child(2){animation-delay:.14s,.76s}.sp-pasos span:nth-child(3){animation-delay:.28s,.92s}.sp-pasos span:nth-child(4){animation-delay:.42s,1.08s}.sp-pasos span:nth-child(5){animation-delay:.56s,1.24s}.sp-pasos span:nth-child(6){animation-delay:.7s,1.4s}.sp-pasos span:nth-child(7){animation-delay:.84s,1.56s}
+.sp-enter{margin-top:22px;border:0;background:rgba(255,255,255,.93);color:var(--sp2);font:600 .95rem Poppins,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 2.6rem;border-radius:999px;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease,background .2s;-webkit-user-select:none;user-select:none}
+.sp-enter.on{opacity:1;visibility:visible;transform:none;animation:latido 2.4s ease-in-out .8s infinite}
+.sp-enter:active{background:#fff;transform:scale(.97)}
+@keyframes latido{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.35)}50%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
+@media (prefers-reduced-motion:reduce){.sp-ring,.sp-orb{animation:none}}
+.ldr{display:flex;gap:8px;justify-content:center;padding:14px 0}.ldr i{width:11px;height:11px;border-radius:50%;background:var(--acc);opacity:.25;animation:late 1.1s ease-in-out infinite}
+.ldr i:nth-child(2){animation-delay:.15s}.ldr i:nth-child(3){animation-delay:.3s}.ldr i:nth-child(4){animation-delay:.45s}.ldr i:nth-child(5){animation-delay:.6s}
+@keyframes late{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
 @media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0d141c;--surface:#152130;--ink:#e6edf5;--ink2:#9fb0c4;--rule:#243447;--acc:#6fb1f2;--acc-t:#173250;--on:#07121e;--key:#1b2b3d;--s1:#6fb1f2;--s2:#e5a255;--s3:#6a8099;--crit:#ef6a62;--good:#5cc08a;--grid:#243447;}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom));touch-action:manipulation}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Poppins,system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom));touch-action:manipulation}
 button,label,select,input{touch-action:manipulation}
 .wrap{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 14px 0}
 h1{font-size:1.15rem;margin:.2rem 0 .6rem}
@@ -54,10 +89,23 @@ input[type=file]{padding:.4rem}
 </style>
 </head>
 <body>
+<div id="splash" role="img" aria-label="Ocarisa Group, Health and Wellness">
+  <svg class="sp-logo" viewBox="0 0 100 100" aria-hidden="true">
+    <g class="sp-ring"><path d="M 80.07 39.06 A 32 32 0 1 1 66 22.29" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/></g>
+    <g class="sp-orb"><circle cx="74.51" cy="29.43" r="4.2" fill="#a9bdd4"/></g>
+    <polyline class="sp-pulso" pathLength="1" points="24,52 33,52 37,44 42,62 48,34 54,57 58,48 62,52" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline class="sp-chulo" pathLength="1" points="62,52 67,58 75,43" fill="none" stroke="#5be39b" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div class="sp-name">Ocarisa Group</div>
+  <div class="sp-app">Health &amp; Wellness</div>
+  <div class="sp-lema">Your health, one step at a time.</div>
+  <div class="sp-pasos" aria-hidden="true"><span>O</span><span>C</span><span>A</span><span>R</span><span>I</span><span>S</span><span>A</span></div>
+  <button class="sp-enter" id="enter" type="button">Ingresar</button>
+</div>
 <div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
 
 <div class="wrap">
-<h1>Salud</h1>
+<h1>Health &amp; Wellness</h1>
 
 <section class="pg on" id="pg-reg">
   <div class="card"><h2>¿De qué día es el registro?</h2><div class="btns" id="fechas"></div><input id="fecha" type="date" style="display:none;margin-top:8px" aria-label="Fecha del registro"></div>
@@ -98,7 +146,7 @@ input[type=file]{padding:.4rem}
 <section class="pg" id="pg-ana">
   <div class="card"><h2>Periodo</h2><div class="btns" id="rango"></div><div class="msg" id="amsg"></div></div>
   <div class="card"><h2>Comparación con el periodo anterior</h2><div id="tabla"></div></div>
-  <div class="card"><h2>Hallazgos</h2><div id="hall"></div></div>
+  <div class="card"><h2>Observaciones</h2><div id="hall"></div></div>
   <div class="card"><h2>Peso</h2>
     <div class="leg"><span><i style="background:var(--s1)"></i>Peso</span><span><i style="background:var(--s2)"></i>Promedio 7 días</span><span><i style="background:var(--s3)"></i>Meta</span></div><div id="ch-peso"></div></div>
   <div class="card"><h2>Tensión</h2>
@@ -125,7 +173,8 @@ input[type=file]{padding:.4rem}
     <input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Repita el PIN" style="margin-top:8px">
     <button class="save" id="gcfg">Guardar</button>
     <button class="save sec" id="ping">Probar conexión</button>
-    <button class="save sec" id="bloq">Bloquear ahora</button><div class="msg" id="mcfg"></div></div>
+    <button class="save sec" id="bloq">Bloquear ahora</button>
+    <button class="save sec" id="snd" type="button">Sonido de bienvenida</button><div class="msg" id="mcfg"></div></div>
 </section>
 </div>
 
@@ -134,6 +183,15 @@ input[type=file]{padding:.4rem}
 <script>
 const PFX="sl";
 const $=id=>document.getElementById(id);
+const LDR='<div class="ldr" aria-label="Cargando"><i></i><i></i><i></i><i></i><i></i></div>';
+const splashT0=Date.now();
+/* Portada: se queda en pantalla hasta que la persona toca «Ingresar». Solo entonces aparece el teclado del PIN. */
+function sonidoOk(){if(rd(PFX+"_snd")==="0")return;try{const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),t=ctx.currentTime;
+  const nota=(f,t0,d,v)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.012);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(ctx.destination);o.start(t0);o.stop(t0+d+.03)};
+  nota(660,t,.2,.16);nota(990,t+.09,.3,.14);nota(1320,t+.18,.45,.11);setTimeout(()=>{try{ctx.close()}catch(e){}},1100)}catch(e){}}
+function quitaSplash(){const s=$("splash"),b=$("enter");if(!s||!b)return;b.textContent=rd(PFX+"_llavec")?"Ingresar":"Comenzar";
+  const t=Math.max(0,2500-(Date.now()-splashT0));setTimeout(()=>b.classList.add("on"),t)}
+$("enter").onclick=()=>{sonidoOk();const s=$("splash");s.classList.add("off");setTimeout(()=>s.remove(),600)};
 const rd=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const rm=k=>{try{localStorage.removeItem(k)}catch(e){}};
@@ -282,7 +340,7 @@ function metricas(med,com,a,b){ // a..b: índices de día incluidos
 function dTxt(x,y,bajaBueno,dec){if(x===null||y===null||x===undefined||y===undefined)return "—";const d=x-y;if(Math.abs(d)<0.05)return "=";const bueno=bajaBueno?d<0:d>0;return `<span class="${bueno?"dn":"up"}">${d>0?"▲":"▼"} ${f1(Math.abs(d))}</span>`}
 async function analisis(){
   btns("rango",[["7","7 días"],["30","30 días"],["90","90 días"],["0","Todo"]],()=>String(rangoSel),v=>{rangoSel=v===""?30:Number(v);analisis()});
-  msg("amsg","");let D;try{D=await datos()}catch(e){msg("amsg",e.message,"err");return}
+  msg("amsg","");if(!cache)$("tabla").innerHTML=LDR;let D;try{D=await datos()}catch(e){msg("amsg",e.message,"err");$("tabla").innerHTML="";return}
   const hoy=di(iso(new Date())),todos=D.med.map(x=>di(x.fecha)).concat(D.com.map(x=>di(x.fecha))),min=todos.length?Math.min.apply(null,todos):hoy;
   const len=rangoSel||Math.max(1,hoy-min+1),a=hoy-len+1,pa=a-len,pb=a-1;
   const A=metricas(D.med,D.com,a,hoy),P=metricas(D.med,D.com,pa,pb);
@@ -326,10 +384,10 @@ function hallazgosSalud(D,a,hoy,A){
   const L=[],r=D.res,m=D.meta,lunes=d=>{const w=(new Date(d*864e5).getUTCDay()+6)%7;return d-w};
   if(r.ritmo_semanal_kg!==null&&r.ritmo_semanal_kg<-0.05&&r.kg_faltan>0){
     const dias=Math.round(r.kg_faltan/(-r.ritmo_semanal_kg/7));
-    L.push(`<b>Meta de ${m.meta_kg} kg:</b> al ritmo actual (${f1(r.ritmo_semanal_kg)} kg por semana) llegaría hacia el <b>${dIso(hoy+dias)}</b>. Es una proyección: cambia con cada registro.`)}
-  else if(r.ritmo_semanal_kg!==null)L.push("Sin tendencia a la baja en las últimas semanas: el peso está estable o subiendo.");
+    L.push(`<b>Meta de ${m.meta_kg} kg:</b> con su ritmo de las últimas semanas (${f1(r.ritmo_semanal_kg)} kg por semana)la <b>fecha de referencia</b> sería hacia el <b>${dIso(hoy+dias)}</b>. Se actualiza con cada registro y no es una promesa.`)}
+  else if(r.ritmo_semanal_kg!==null)L.push("En las últimas semanas su peso se mantiene estable o sube un poco. Es un dato para conversar con su asesor.");
   else L.push("Aún no hay pesajes suficientes para estimar el ritmo (hacen falta al menos 4 en más de 7 días).");
-  if(r.ritmo_semanal_kg!==null&&r.ritmo_semanal_kg<-1)L.push("El ritmo supera 1 kg por semana. Como referencia general se suele considerar 0,5 a 1 kg; conviene comentarlo con su asesor.");
+  if(r.ritmo_semanal_kg!==null&&r.ritmo_semanal_kg<-1)L.push("Su ritmo reciente es mayor que la referencia habitual de 0,5 a 1 kg por semana. Vale la pena comentarlo con su asesor.");
   // peso promedio por semana
   const pesoSem={};D.med.filter(x=>x.peso_kg!=="").forEach(x=>{const k=lunes(di(x.fecha));(pesoSem[k]=pesoSem[k]||[]).push(Number(x.peso_kg))});
   const sk=Object.keys(pesoSem).map(Number).sort((x,y)=>x-y),cambios=[];
@@ -339,24 +397,25 @@ function hallazgosSalud(D,a,hoy,A){
   const diasRec={};D.com.forEach(x=>{const o=diasRec[x.fecha]||(diasRec[x.fecha]={no:0,p:0});if(x.siguio_recetario==="no")o.no++;if(x.siguio_recetario==="parcial")o.p++});
   Object.keys(diasRec).forEach(f=>{if(diasRec[f].no===0&&diasRec[f].p===0){const k=lunes(di(f));recSem[k]=(recSem[k]||0)+1}});
   const compara=(fn,umbral,etiqueta)=>{const si=cambios.filter(c=>fn(c.k)>=umbral).map(c=>c.d),no=cambios.filter(c=>fn(c.k)<umbral).map(c=>c.d);
-    if(si.length>=2&&no.length>=2)L.push(`<b>${etiqueta}:</b> en las semanas con ${umbral === 3 ? "3 o más sesiones" : "4 o más días con recetario"} el peso cambió ${f1(prom(si))} kg en promedio; en las demás, ${f1(prom(no))} kg. Con pocas semanas es solo una pista.`)};
+    if(si.length>=2&&no.length>=2)L.push(`<b>${etiqueta}:</b> en sus datos, las semanas con ${umbral === 3 ? "3 o más sesiones" : "4 o más días con recetario"} <b>coinciden</b> con un cambio de ${f1(prom(si))} kg; en las demás, ${f1(prom(no))} kg. Es una observación con pocos datos y no demuestra que una cosa cause la otra.`)};
   compara(k=>minSem[k]||0,3,"Actividad y peso");compara(k=>recSem[k]||0,4,"Recetario y peso");
   // energía con y sin actividad
   const diaAct=new Set(D.med.filter(x=>Number(x.actividad_min)>0).map(x=>x.fecha)),en={s:[],n:[]};
   D.med.filter(x=>x.energia_1a5!=="").forEach(x=>(diaAct.has(x.fecha)?en.s:en.n).push(Number(x.energia_1a5)));
-  if(en.s.length>=3&&en.n.length>=3)L.push(`<b>Energía:</b> ${f1(prom(en.s))} en días con actividad frente a ${f1(prom(en.n))} en días sin actividad.`);
+  if(en.s.length>=3&&en.n.length>=3)L.push(`<b>Energía:</b> su energía promedio fue ${f1(prom(en.s))} en días con actividad y ${f1(prom(en.n))} en días sin actividad.`);
   // tensión
   if(A.sisAM!==null&&A.sisPM!==null)L.push(`<b>Tensión:</b> sistólica promedio de ${f1(A.sisAM)} por la mañana y ${f1(A.sisPM)} por la noche.`);
   const pres=D.med.filter(x=>x.presion_sis!==""&&di(x.fecha)>=a),altas=pres.filter(x=>Number(x.presion_sis)>=140||Number(x.presion_dia)>=90);
-  if(pres.length)L.push(`${altas.length} de ${pres.length} lecturas del periodo tuvieron sistólica de 140 o más, o diastólica de 90 o más. Es solo un dato informativo: compártalo con su médico si se repite.`);
+  if(pres.length)L.push(`${altas.length} de ${pres.length} lecturas del periodo tuvieron sistólica de 140 o más, o diastólica de 90 o más. Esta app no diagnostica: si se repite, consulte a su médico.`);
   // constancia
   const dias=new Set(D.med.concat(D.com).filter(x=>di(x.fecha)>=a).map(x=>x.fecha));
-  L.push(`<b>Constancia:</b> registró datos en ${dias.size} de los ${hoy-a+1} días del periodo.`);
-  $("hall").innerHTML=L.map(t=>`<p style="margin:.35rem 0;font-size:.9rem">• ${t}</p>`).join("");
+  L.push(`Registró datos en ${dias.size} de los ${hoy-a+1} días de este periodo.`);
+  $("hall").innerHTML=L.map(t=>`<p style="margin:.35rem 0;font-size:.9rem">• ${t}</p>`).join("")+'<p style="margin:.6rem 0 0;font-size:.75rem;color:var(--ink2)">Información orientativa; no reemplaza la valoración de un profesional de la salud.</p>';
 }
 
 /* ===== Semana ===== */
 async function semana(){
+  if(!cache)$("kpi").innerHTML=LDR;
   try{const D=await datos(),r=D.res,m=r.meta;
     $("kpi").innerHTML=`<div><small>Último peso</small><b>${f1(r.ultimo_peso)} kg</b></div><div><small>Promedio 7 días</small><b>${f1(r.promedio_movil_7d)} kg</b></div>
      <div><small>Bajados</small><b>${f1(r.kg_bajados)} kg</b></div><div><small>Faltan</small><b>${f1(r.kg_faltan)} kg</b></div>
@@ -391,11 +450,14 @@ $("gcfg").onclick=async()=>{
 $("ping").onclick=async()=>{const m=$("mcfg");m.className="msg";m.textContent="Probando...";try{const t=performance.now();await get("ping");m.textContent="Conexión correcta ("+Math.round(performance.now()-t)+" ms)";m.className="msg ok"}catch(e){m.textContent=e.message;m.className="msg err"}};
 $("bloq").onclick=()=>{if(rd(PFX+"_llavec"))bloquear();else msg("mcfg","Aún no hay PIN configurado","err")};
 $("url").value=rd(PFX+"_url");
+const sndLbl=()=>{$("snd").textContent="Sonido de bienvenida: "+(rd(PFX+"_snd")==="0"?"desactivado":"activado")};
+$("snd").onclick=()=>{wr(PFX+"_snd",rd(PFX+"_snd")==="0"?"1":"0");sndLbl();if(rd(PFX+"_snd")!=="0")sonidoOk()};sndLbl();
 (function arranque(){
   pintaTodo();prefijaHoras();
   if(rd(PFX+"_llavec"))lockMostrar("entrar");
   else if(rd(PFX+"_llave")&&rd(PFX+"_url")&&cripto){lockMostrar("crear");lmsg("Proteja la app con un PIN. La llave quedará cifrada.")}
   else irA("cfg");
+  quitaSplash();
 })();
 </script>
 </body>
