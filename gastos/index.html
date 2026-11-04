@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-04.7">
+<meta name="app-version" content="2026-11-04.9">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -33,8 +33,10 @@
 .sp-pasos{display:flex;gap:6px;margin-top:12px;justify-content:center;align-items:center;min-height:46px;max-width:100%;overflow:hidden}
 .sp-pasos span{display:grid;place-items:center;height:44px;border-radius:11px;background:rgba(255,255,255,.93);color:var(--sp2);font-weight:600;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .sp-pasos .lb{width:36px;font-size:1.1rem}
-.sp-pasos .lb.pop{animation:pop .28s ease-out}
-.sp-pasos .lw{padding:0 16px;font-size:.98rem;animation:llega .42s cubic-bezier(.2,.8,.2,1)}
+.sp-pasos .lb.ci{border-radius:50%;width:38px;height:38px;opacity:0;transform:scale(.92);transition:opacity 1.8s ease,transform 1.8s ease}.sp-pasos .lb.ci.on{opacity:1;transform:none}
+.sp-pasos .lw{padding:0 16px;font-size:.98rem;animation:llegaSuave 2.4s cubic-bezier(.33,.0,.2,1) both}
+@keyframes llegaSuave{0%{opacity:0;transform:translateX(22px)}60%{opacity:.7}100%{opacity:1;transform:none}}
+@keyframes popSuave{from{transform:scale(1.05);opacity:.35}to{transform:none;opacity:1}}
 .sp-enter{margin-top:22px;border:0;background:rgba(255,255,255,.93);color:var(--sp2);font:600 .95rem Poppins,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 2.6rem;border-radius:999px;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease,background .2s;-webkit-user-select:none;user-select:none}
 .sp-enter.on{opacity:1;visibility:visible;transform:none;animation:latido 2.4s ease-in-out .8s infinite}
 .sp-enter:active{background:#fff;transform:scale(.97)}
@@ -138,6 +140,15 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
   <div class="lbl">Categoría <button id="todas" type="button">Ver todas</button></div>
   <div class="chips" id="cats"></div>
   <select id="sel" style="display:none" aria-label="Todas las categorías"></select>
+  <div id="nuevaCat" class="card" style="display:none">
+    <h2>Nueva categoría</h2>
+    <label class="lbl" for="nc-g">Grupo</label><select id="nc-g"></select>
+    <input id="nc-gn" maxlength="40" placeholder="Nombre del grupo nuevo (ej: Eventos)" style="display:none;margin-top:6px">
+    <label class="lbl" for="nc-c" style="margin-top:8px;display:block">Categoría</label><input id="nc-c" maxlength="40" placeholder="Ej: Cumpleaños, Eventos oficina" autocomplete="off">
+    <label class="lbl" for="nc-t" style="margin-top:8px;display:block">Tope mensual (opcional)</label><input id="nc-t" type="number" inputmode="numeric" placeholder="0">
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="save sec" id="nc-x" type="button" style="flex:1">Cancelar</button><button class="save" id="nc-ok" type="button" style="flex:2">Crear y usar</button></div>
+    <div class="msg" id="nc-m"></div>
+  </div>
   <div class="lbl">Medio de pago</div>
   <div class="pay" id="pay"></div>
   <div class="lbl">Fecha</div>
@@ -145,8 +156,10 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
   <input id="fecha" type="date" style="display:none" aria-label="Fecha del gasto">
   <div class="lbl">Comercio</div>
   <input id="com" list="coms" placeholder="Opcional: Sandra Plaza, Jumbo..." autocomplete="off"><datalist id="coms"></datalist>
+  <div class="lbl">Descripción (qué compró y para qué)</div>
+  <input id="desc" maxlength="140" placeholder="Opcional: torta del cumpleaños de Laura" autocomplete="off">
   <div class="lbl">Factura o soporte</div>
-  <div class="foto"><label class="chip" for="foto">📷 Foto</label><input id="foto" type="file" accept="image/*" capture="environment"><img id="prev" alt="Vista previa">
+  <div class="foto"><label class="chip" for="foto">📷 Cámara</label><input id="foto" type="file" accept="image/*" capture="environment"><label class="chip" for="fotoG">🖼 Galería</label><input id="fotoG" type="file" accept="image/*"><img id="prev" alt="Vista previa">
     <div class="pay" id="tdoc" style="flex:1;display:none"></div></div>
   <div class="savebar"><div class="msg" id="msg"></div><button class="save" id="save">Guardar</button></div>
 </section>
@@ -169,6 +182,9 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
   <div class="card"><h2>Por grupo</h2><div id="ch-grp"></div></div>
   <div class="card"><h2>Día de la semana</h2><div id="ch-dia"></div></div>
   <div class="card"><h2>Comercios</h2><div id="ch-com"></div></div>
+  <div class="card"><h2>Medio de pago</h2><p class="hint">Solo los movimientos nuevos traen el medio.</p><div id="ch-med"></div></div>
+  <div class="card"><h2>Ingresos y gastos por mes</h2><div class="leg"><span><i style="background:var(--s1)"></i>Gasto</span><span><i style="background:#2e9b6a"></i>Ingreso</span></div><div id="ch-flujo"></div></div>
+  <div class="card"><h2>Fugas: suscripciones y recurrentes</h2><p class="hint">Promedio mensual real, proyectado a un año.</p><div id="ch-subs"></div></div>
 </section>
 
 <section class="pg" id="pg-cfg">
@@ -209,19 +225,27 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-04.7";
+const APP_V="2026-11-04.9";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
 /* Portada: se queda en pantalla hasta que la persona toca «Ingresar». Solo entonces aparece el teclado del PIN. */
-function sonidoOk(){if(rd(PFX+"_snd")==="0")return;try{const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),t=ctx.currentTime;
-  const nota=(f,t0,d,v)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.012);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(ctx.destination);o.start(t0);o.stop(t0+d+.03)};
-  nota(740,t,.12,.05);nota(1110,t+.07,.2,.04);setTimeout(()=>{try{ctx.close()}catch(e){}},700)}catch(e){}}
+/* Sonidos: se generan en el teléfono como audio WAV (sin archivos), y suenan aunque el interruptor lateral esté en silencio */
+const SND={};
+function wavTono(notas){const sr=22050,fin=Math.max.apply(null,notas.map(n=>n[1]+n[2]))+.06,N=Math.floor(sr*fin),b=new Float32Array(N);
+  notas.forEach(n=>{const f=n[0],t0=n[1],d=n[2],v=n[3],i0=Math.floor(t0*sr),m=Math.floor(d*sr);for(let i=0;i<m&&i0+i<N;i++){const t=i/sr,env=Math.min(1,t/.01)*Math.exp(-5*t/d);b[i0+i]+=(Math.sin(6.2832*f*t)+.18*Math.sin(12.5664*f*t))*v*env}});
+  const buf=new ArrayBuffer(44+N*2),dv=new DataView(buf),w=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))};
+  w(0,"RIFF");dv.setUint32(4,36+N*2,true);w(8,"WAVEfmt ");dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,"data");dv.setUint32(40,N*2,true);
+  for(let i=0;i<N;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,b[i]))*32767,true);
+  return URL.createObjectURL(new Blob([buf],{type:"audio/wav"}))}
+const TONOS={entrada:[[587,0,.4,.38],[880,.11,.55,.34]],guardado:[[784,0,.2,.34],[1047,.09,.22,.32],[1319,.18,.5,.3]]};
+function sonar(n){if(rd(PFX+"_snd")==="0")return;try{if(!SND[n])SND[n]=wavTono(TONOS[n]);const a=new Audio(SND[n]);a.volume=1;const p=a.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+const sonidoOk=()=>sonar("entrada"),sonidoGuardado=()=>sonar("guardado");
 function quitaSplash(){const s=$("splash"),b=$("enter");if(!s||!b)return;b.textContent=rd(PFX+"_llavec")?"Ingresar":"Comenzar";
-  const t=Math.max(0,3600-(Date.now()-splashT0));setTimeout(()=>b.classList.add("on"),t)}
+  const t=Math.max(0,6200-(Date.now()-splashT0));setTimeout(()=>b.classList.add("on"),t)}
 pasosPortada();
 /* Portada: cada palabra del método llega desde la derecha y se encoge a su letra hasta formar OCARISA */
-function pasosPortada(){const c=$("sp-pasos");if(!c)return;let k=0;const paso=()=>{c.innerHTML=ldrHtml(k);k++;if(k<=7)setTimeout(paso,430)};paso()}
+function pasosPortada(){const c=$("sp-pasos");if(!c)return;c.innerHTML=PASOS.map(p=>'<span class="lb ci">'+p[0].toUpperCase()+"</span>").join("");const cs=c.children;for(let k=0;k<cs.length;k++)setTimeout(()=>cs[k].classList.add("on"),500+k*750)}
 $("enter").onclick=()=>{sonidoOk();const s=$("splash");s.classList.add("off");setTimeout(()=>s.remove(),600)};
 const rd=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
@@ -303,7 +327,7 @@ function pintaCats(){
   const lista=esIng?catalogo.categorias.filter(x=>x.g==="Ingreso"):catalogo.frecuentes;
   $("cats").innerHTML=lista.map(x=>`<button type="button" class="chip ${sel&&sel.g===x.g&&sel.c===x.c?"on":""}" data-g="${esc(x.g)}" data-c="${esc(x.c)}">${x.c==="Otros"?esc(x.g)+" · Otros":esc(x.c)}</button>`).join("");
   const grupos={};catalogo.categorias.filter(x=>esIng?x.g==="Ingreso":x.g!=="Ingreso").forEach(x=>(grupos[x.g]=grupos[x.g]||[]).push(x));
-  $("sel").innerHTML='<option value="">Todas las categorías…</option>'+Object.keys(grupos).map(g=>`<optgroup label="${esc(g)}">`+grupos[g].map(x=>`<option value="${esc(g)}|${esc(x.c)}">${esc(x.c)}</option>`).join("")+"</optgroup>").join("");
+  $("sel").innerHTML='<option value="">Todas las categorías…</option><option value="__nueva__">➕ Nueva categoría…</option>'+Object.keys(grupos).map(g=>`<optgroup label="${esc(g)}">`+grupos[g].map(x=>`<option value="${esc(g)}|${esc(x.c)}">${esc(x.c)}</option>`).join("")+"</optgroup>").join("");
 }
 function pintaBtns(){
   $("pay").innerHTML=MEDIOS.map(m=>`<button type="button" class="chip ${medio===m?"on":""}" data-m="${m}">${m==="Transferencia"?"Transf.":m}</button>`).join("");
@@ -316,7 +340,7 @@ function pintaBtns(){
 $("keys").innerHTML=["1","2","3","4","5","6","7","8","9","000","0","⌫"].map(k=>`<button type="button" data-k="${k}">${k}</button>`).join("");
 $("tipo").onclick=e=>{const b=e.target.closest("[data-t]");if(!b)return;tipo=b.dataset.t;sel=null;document.querySelectorAll("#tipo button").forEach(x=>x.classList.toggle("on",x===b));pintaCats()};
 $("todas").onclick=()=>{$("sel").style.display=$("sel").style.display==="none"?"block":"none"};
-$("sel").onchange=e=>{if(!e.target.value)return;const p=e.target.value.split("|");sel={g:p[0],c:p[1]};pintaCats();$("sel").style.display="none";$("sel").value=""};
+$("sel").onchange=e=>{if(!e.target.value)return;if(e.target.value==="__nueva__"){$("sel").style.display="none";$("sel").value="";abreNuevaCat();return}const p=e.target.value.split("|");sel={g:p[0],c:p[1]};pintaCats();$("sel").style.display="none";$("sel").value=""};
 document.addEventListener("click",e=>{
   const k=e.target.closest("[data-k]"),c=e.target.closest("#cats [data-c]"),m=e.target.closest("[data-m]"),f=e.target.closest("[data-f]"),d=e.target.closest("[data-d]");
   if(k){const x=k.dataset.k;if(x==="⌫")v=v.length>1?v.slice(0,-1):"0";else if(v.length<10)v=(v==="0"?"":v)+x;if(v==="")v="0";pintaBtns()}
@@ -330,7 +354,7 @@ let ultimoToque=0;document.addEventListener("touchend",e=>{const t=Date.now();if
 ["gesturestart","gesturechange","gestureend"].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
 
 /* ---- foto ---- */
-$("foto").onchange=async e=>{const f=e.target.files[0];if(!f){fotoB64="";$("prev").style.display="none";pintaBtns();return}
+$("foto").onchange=$("fotoG").onchange=async e=>{const f=e.target.files[0];if(!f){fotoB64="";$("prev").style.display="none";pintaBtns();return}
   try{fotoB64=await comprimir(f);$("prev").src="data:image/jpeg;base64,"+fotoB64;$("prev").style.display="block";msg("Foto lista ("+Math.round(fotoB64.length*.75/1024)+" KB)",0)}
   catch(x){fotoB64="";msg("No se pudo leer la foto",1)}pintaBtns()};
 function comprimir(file){return new Promise((ok,ko)=>{const img=new Image(),u=URL.createObjectURL(file);
@@ -347,17 +371,17 @@ $("save").onclick=async()=>{
   let fecha=iso(new Date());
   if(fechaSel==="ayer"){const d=new Date();d.setDate(d.getDate()-1);fecha=iso(d)}
   if(fechaSel==="otra"){if(!$("fecha").value)return msg("Elija la fecha",1);fecha=$("fecha").value}
-  const o={accion:"gasto",id:nuevoId(),valor:valor,tipo:tipo,grupo:sel.g,categoria:sel.c,medio:medio||undefined,comercio:$("com").value.trim()||undefined,fecha:fecha,origen:"pagina"};
+  const o={accion:"gasto",id:nuevoId(),valor:valor,tipo:tipo,grupo:sel.g,categoria:sel.c,medio:medio||undefined,comercio:$("com").value.trim()||undefined,nota:$("desc").value.trim()||undefined,fecha:fecha,origen:"pagina"};
   if(fotoB64){o.foto_b64=fotoB64;o.tipo_doc=tdoc}
   msg("Guardando...",0);$("save").disabled=true;
-  try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);limpia();MOV=null}
+  try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);sonidoGuardado();limpia();MOV=null}
   catch(e){
     if(e.api){msg(e.message,1)}
     else{const q=cola();q.push(o);if(guardaCola(q)){msg("Sin conexión: quedó en cola ("+q.length+"). Se envía al abrir con señal.",2);limpia()}else msg("Sin conexión y no se pudo guardar en cola",1)}
   }
   $("save").disabled=false;
 };
-function limpia(){v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").value="";$("prev").style.display="none";$("com").value="";pintaCats();pintaBtns()}
+function limpia(){v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";$("com").value="";$("desc").value="";pintaCats();pintaBtns()}
 
 /* ---- Hoy ---- */
 async function hoy(){
@@ -368,7 +392,7 @@ async function hoy(){
     const dia=r.movimientos.filter(m=>m.fecha===h&&m.tipo==="Gasto");
     $("htot").textContent=fmt(dia.reduce((s,m)=>s+m.valor,0));$("hsub").textContent=dia.length+" movimientos hoy";
     const pend=r.movimientos.filter(m=>m.estado==="pendiente").length;
-    $("hlist").innerHTML=r.movimientos.slice(0,25).map(m=>`<div class="item"><div>${esc(m.c)}${m.estado==="pendiente"?' <span class="pill">por confirmar</span>':""}${m.foto?" 📎":""}<br><small>${m.fecha}${m.comercio?" · "+esc(m.comercio):""}${m.medio?" · "+m.medio:""}</small></div><b>${m.tipo==="Ingreso"?"+":""}${fmt(m.valor)}</b></div>`).join("")||"<div class='item'>Sin movimientos.</div>";
+    $("hlist").innerHTML=r.movimientos.slice(0,25).map(m=>`<div class="item"><div>${esc(m.c)}${m.estado==="pendiente"?' <span class="pill">por confirmar</span>':""}${m.foto?" 📎":""}<br><small>${m.fecha}${m.comercio?" · "+esc(m.comercio):""}${m.medio?" · "+m.medio:""}</small>${m.nota?'<br><small>'+esc(m.nota)+"</small>":""}</div><b>${m.tipo==="Ingreso"?"+":""}${fmt(m.valor)}</b></div>`).join("")||"<div class='item'>Sin movimientos.</div>";
     $("hmsg").className="msg";$("hmsg").textContent=pend?pend+" por confirmar entre los últimos movimientos.":""}
   catch(e){$("hmsg").textContent=e.message;$("hmsg").className="msg err"}
 }
@@ -452,6 +476,7 @@ async function analisis(){
   const dow=Array(7).fill(0);G.forEach(r=>dow[r.dow]+=r.v);const N=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],mxd=Math.max.apply(null,dow.concat([1]));
   $("ch-dia").innerHTML=`<svg viewBox="0 0 300 130" role="img" aria-label="Gasto por día de la semana">`+dow.map((x,i)=>{const h=100*x/mxd,cx=21+i*43;return `<rect x="${cx-14}" y="${108-h}" width="28" height="${h}" rx="3" fill="${x===mxd&&x>0?"var(--s1)":"var(--s2)"}"><title>${N[i]}: ${fmt(x)}</title></rect><text x="${cx}" y="124" text-anchor="middle">${N[i]}</text>`}).join("")+"</svg>";
   $("ch-com").innerHTML=barsH(Object.entries(agrupa(G.filter(r=>r.com),r=>r.com.replace(/\s+/g," ").trim())).sort((x,y)=>y[1].v-x[1].v).slice(0,8).map(([n,o])=>({n:n,v:o.v})),gt);
+  tarjetasExtra(G,a,b,grp,inR);
   hallazgos({G:G,P:P,gt:gt,pt:pt,a:a,b:b,pa:pa,len:len,grp:grp,cs:cs,pc:pc,tope:tope,dow:dow,unMes:unMes,corteMesActual:corteMesActual,hoyD:hoyD,inR:inR});
 }
 function hallazgos(c){
@@ -484,6 +509,40 @@ function hallazgos(c){
 }
 $("aper").onchange=analisis;$("agrp").onchange=analisis;
 $("ch-mes").addEventListener("click",e=>{const g=e.target.closest("[data-m]");if(g){$("aper").value="m"+g.dataset.m;analisis()}});
+
+/* ---- Nueva categoría (se guarda en la hoja Presupuesto, junto a su grupo) ---- */
+Object.assign(ERR,{nombre:"Escriba un nombre válido (sin empezar por = + - @)",grupo:"Ese grupo no se puede usar",tope:"Tope inválido",duplicada:"Ya existe esa categoría en ese grupo",limite:"Hay demasiadas categorías"});
+function abreNuevaCat(){if(!catalogo){msg("Conecte la app primero",1);return}
+  const gs=Array.from(new Set(catalogo.categorias.filter(x=>x.g!=="Ingreso").map(x=>x.g)));
+  $("nc-g").innerHTML=gs.map(g=>`<option>${esc(g)}</option>`).join("")+'<option value="__nuevo__">Otro grupo nuevo…</option>';
+  $("nc-gn").style.display="none";$("nc-m").textContent="";$("nc-c").value="";$("nc-t").value="";$("nuevaCat").style.display="block";$("nuevaCat").scrollIntoView({block:"center"})}
+$("nc-g").onchange=()=>{$("nc-gn").style.display=$("nc-g").value==="__nuevo__"?"block":"none"};
+$("nc-x").onclick=()=>{$("nuevaCat").style.display="none"};
+$("nc-ok").onclick=async()=>{const g=$("nc-g").value==="__nuevo__"?$("nc-gn").value.trim():$("nc-g").value,c=$("nc-c").value.trim(),m=$("nc-m");
+  if(!g||!c){m.textContent="Escriba el grupo y la categoría";m.className="msg err";return}
+  m.textContent="Creando...";m.className="msg";$("nc-ok").disabled=true;
+  try{const t=$("nc-t").value.trim(),r=await post({accion:"categoria",grupo:g,categoria:c,tope:t===""?undefined:Number(t)});
+    await cargaCatalogo();sel={g:r.g,c:r.c};pintaCats();$("nuevaCat").style.display="none";msg("Categoría creada: "+r.g+" · "+r.c,2);sonidoGuardado()}
+  catch(e){m.textContent=e.message;m.className="msg err"}$("nc-ok").disabled=false};
+
+/* ---- Tarjetas extra del análisis: medio de pago, flujo mensual y fugas ---- */
+function tarjetasExtra(G,a,b,grp,inR){
+  $("ch-med").innerHTML=barsH(Object.entries(agrupa(G,r=>r.med||"Sin medio")).sort((x,y)=>y[1].v-x[1].v).map(([n,o])=>({n:n,v:o.v})),sum(G));
+  // flujo de los últimos 6 meses
+  const hoyD=new Date(),cur=hoyD.getFullYear()*12+hoyD.getMonth()+1,ms=[];for(let m=cur-5;m<=cur;m++)ms.push(m);
+  const gv=ms.map(m=>sum(MOV.filter(r=>r.t==="G"&&r.mi===m))),iv=ms.map(m=>sum(MOV.filter(r=>r.t==="I"&&r.mi===m)));
+  const el=$("ch-flujo"),W=Math.max(el.clientWidth,300),H=170,L=40,B=22,T=8,R=6,mx=Math.max.apply(null,gv.concat(iv).concat([1])),Y=v=>T+(H-T-B)*(1-v/mx),bw=Math.min(20,(W-L-R)/6*.36),X=i=>L+(i+.5)*(W-L-R)/6;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ingresos y gastos por mes">`;
+  for(let k=0;k<=3;k++){const v=mx*k/3;s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${L-4}" y="${Y(v)+3}" text-anchor="end">${cmp(v)}</text>`}
+  ms.forEach((m,i)=>{s+=`<rect x="${X(i)-bw-1}" y="${Y(gv[i])}" width="${bw}" height="${Math.max(Y(0)-Y(gv[i]),0)}" rx="3" fill="var(--s1)"><title>${labML(m)} gasto: ${fmt(gv[i])}</title></rect><rect x="${X(i)+1}" y="${Y(iv[i])}" width="${bw}" height="${Math.max(Y(0)-Y(iv[i]),0)}" rx="3" fill="#2e9b6a"><title>${labML(m)} ingreso: ${fmt(iv[i])}</title></rect><text x="${X(i)}" y="${H-6}" text-anchor="middle">${MESES[(m-1)%12]}</text>`});
+  el.innerHTML=s+`<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--rule)"/></svg>`;
+  // suscripciones y recurrentes: promedio de los meses con registro suficiente
+  const SUBS=["Netflix","Adobe","Spotify","Apple","ChatGPT","Google","Prime","Claude","Internet (Claro)","Teléfono (Movistar)","Gimnasio","Televisión por cable"];
+  const buenos=ms.concat([cur-6,cur-7,cur-8]).filter(m=>MOV.filter(r=>r.mi===m).length>=25).slice(-6);
+  const filas=SUBS.map(c=>{const vals=buenos.map(m=>sum(MOV.filter(r=>r.mi===m&&r.t==="G"&&r.c===c))).filter(v=>v>0);return {n:c,v:vals.length?vals.reduce((p,q)=>p+q,0)/vals.length:0}}).filter(x=>x.v>0).sort((x,y)=>y.v-x.v);
+  const anual=filas.reduce((p,x)=>p+x.v*12,0);
+  $("ch-subs").innerHTML=barsH(filas.map(x=>({n:x.n,v:x.v,txt:cmp(x.v)+"/mes · "+cmp(x.v*12)+"/año"})),0)+(filas.length?`<div class="hint" style="margin-top:.5rem">Total proyectado: <b>${fmt(anual)}</b> al año en ${filas.length} conceptos.</div>`:"");
+}
 
 /* ---- navegación y configuración ---- */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
