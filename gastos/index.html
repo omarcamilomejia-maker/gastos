@@ -30,6 +30,8 @@ input,select,textarea{width:100%;font:inherit;font-size:.9rem;padding:.55rem .7r
 .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .keys button{border:0;background:var(--key);color:var(--ink);border-radius:.7rem;padding:.45rem 0;font:500 1.15rem ui-monospace,Consolas,monospace;cursor:pointer}
 .keys button:active{background:var(--rule)}
+.savebar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));background:var(--bg);padding:6px 0 4px;z-index:2;box-shadow:0 -8px 8px -6px var(--bg)}
+.savebar .msg{min-height:0;margin-bottom:2px}
 .save{border:0;background:var(--acc);color:var(--on);border-radius:.9rem;padding:.8rem;font-size:1rem;font-weight:700;cursor:pointer;width:100%}
 .save.sec{background:var(--key);color:var(--ink)}
 .foto{display:flex;gap:8px;align-items:center}.foto label.chip{flex:none;padding:.5rem .8rem;display:grid;place-items:center}
@@ -53,6 +55,7 @@ input,select,textarea{width:100%;font:inherit;font-size:.9rem;padding:.55rem .7r
 <section class="pg on" id="pg-reg">
   <div class="seg" id="tipo"><button class="on" data-t="Gasto">Gasto</button><button data-t="Ingreso">Ingreso</button></div>
   <div class="amt"><small>Valor</small><b id="amt">$ 0</b></div>
+  <div class="keys" id="keys"></div>
   <div class="lbl">Categoría <button id="todas" type="button">Ver todas</button></div>
   <div class="chips" id="cats"></div>
   <select id="sel" style="display:none" aria-label="Todas las categorías"></select>
@@ -66,9 +69,7 @@ input,select,textarea{width:100%;font:inherit;font-size:.9rem;padding:.55rem .7r
   <div class="lbl">Factura o soporte</div>
   <div class="foto"><label class="chip" for="foto">📷 Foto</label><input id="foto" type="file" accept="image/*" capture="environment"><img id="prev" alt="Vista previa">
     <div class="pay" id="tdoc" style="flex:1;display:none"></div></div>
-  <div class="keys" id="keys"></div>
-  <button class="save" id="save">Guardar</button>
-  <div class="msg" id="msg"></div>
+  <div class="savebar"><div class="msg" id="msg"></div><button class="save" id="save">Guardar</button></div>
 </section>
 
 <section class="pg" id="pg-hoy">
