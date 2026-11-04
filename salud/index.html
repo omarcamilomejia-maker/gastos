@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-04.5">
+<meta name="app-version" content="2026-11-04.6">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -47,9 +47,13 @@
 .ldr-t{font-weight:500;font-size:.92rem;letter-spacing:.02em;background:linear-gradient(90deg,var(--ink2) 0%,var(--ink) 45%,var(--ink2) 90%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:brilla 1.9s linear infinite,late 2.3s ease-in-out infinite}
 @keyframes brilla{0%{background-position:110% 0}100%{background-position:-110% 0}}
 @keyframes late{0%,100%{opacity:.4}50%{opacity:1}}
-.ldr-l{display:flex;gap:5px}
-.ldr-l span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--acc-t);color:var(--acc);font-weight:600;font-size:.68rem;opacity:0;transform:translateX(16px);transition:opacity .25s ease,transform .3s ease}
-.ldr-l span.on{opacity:1;transform:none}
+.ldr-r{display:flex;gap:5px;justify-content:center;align-items:center;min-height:44px;max-width:100%;overflow:hidden}
+.ldr-r span{display:grid;place-items:center;height:42px;border-radius:10px;background:linear-gradient(180deg,var(--sp1),var(--sp2));color:#fff;border:1.5px solid rgba(0,0,0,.3);font-weight:600;white-space:nowrap}
+.ldr-r .lb{width:31px;font-size:1rem}
+.ldr-r .lb.pop{animation:pop .28s ease-out}
+.ldr-r .lw{padding:0 14px;font-size:.92rem;animation:llega .4s cubic-bezier(.2,.8,.2,1)}
+@keyframes llega{from{opacity:0;transform:translateX(90px)}to{opacity:1;transform:none}}
+@keyframes pop{from{transform:scale(1.22)}to{transform:none}}
 @media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0d141c;--surface:#152130;--ink:#e6edf5;--ink2:#9fb0c4;--rule:#243447;--acc:#6fb1f2;--acc-t:#173250;--on:#07121e;--key:#1b2b3d;--s1:#6fb1f2;--s2:#e5a255;--s3:#6a8099;--crit:#ef6a62;--good:#5cc08a;--grid:#243447;}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
@@ -189,12 +193,16 @@ input[type=file]{padding:.4rem}
 <script>
 const PFX="sl";
 const $=id=>document.getElementById(id);
-const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class="ldr-t">Cargando datos</div><div class="ldr-l">'+"OCARISA".split("").map(l=>"<span>"+l+"</span>").join("")+'</div></div>';
-/* Espera: «Cargando datos» con brillo que aparece y desaparece, y las letras de OCARISA entrando de derecha a izquierda hasta formar la palabra */
-let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-l");if(!els.length)return;ldrN=(ldrN+1)%11;
-  els.forEach(el=>{for(let j=0;j<7;j++)el.children[j].classList.toggle("on",j>=7-Math.min(ldrN,7))})},170);
+/* Método OCARISA adaptado a esta app (Salud y bienestar). Para cambiar el idioma de las palabras: IDIOMA_PASOS = "en". */
+const IDIOMA_PASOS="es";
+const PASOS={es:["Observar","Cuidar","Activar","Recuperar","Integrar","Superar","Alcanzar"],en:["Observe","Condition","Activate","Recover","Integrate","Strengthen","Achieve"]}[IDIOMA_PASOS];
+/* Espera: «Cargando datos» con brillo, y cada palabra del método llega desde la derecha; al llegar la siguiente se encoge a su letra, hasta formar OCARISA */
+function ldrHtml(k){let h="";for(let i=0;i<Math.min(k,7);i++)h+='<span class="lb'+(i===k-1?" pop":"")+'">'+PASOS[i][0].toUpperCase()+"</span>";if(k<7)h+='<span class="lw">'+PASOS[k]+"</span>";return h}
+const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class="ldr-t">Cargando datos</div><div class="ldr-r" data-k="0">'+ldrHtml(0)+'</div></div>';
+let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
+  els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-04.5";
+const APP_V="2026-11-04.6";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
