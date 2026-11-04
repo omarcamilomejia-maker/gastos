@@ -2,16 +2,18 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Gastos">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Gastos</title>
 <style>
-:root{color-scheme:light;--bg:#f6f8f7;--surface:#fff;--ink:#11201a;--ink2:#52625b;--rule:#d7e0db;--acc:#0b6b4d;--acc-t:#d6ede2;--on:#fff;--key:#e9eeeb;--crit:#c2362f;--warn:#8f5100;--warn-t:#f4e5c7}
-@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0f1713;--surface:#16211c;--ink:#e4ede8;--ink2:#9db1a8;--rule:#26352f;--acc:#3fd39c;--acc-t:#133a2c;--on:#06110c;--key:#1c2924;--crit:#ef6a62;--warn:#e5a93d;--warn-t:#3a2c10}}
+:root{color-scheme:light;--bg:#f6f8f7;--surface:#fff;--ink:#11201a;--ink2:#52625b;--rule:#d7e0db;--acc:#0b6b4d;--acc-t:#d6ede2;--on:#fff;--key:#e9eeeb;--crit:#c2362f;--warn:#8f5100;--warn-t:#f4e5c7;--s1:#0b6b4d;--s2:#8aa39a;--grid:#e1e6e3}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0f1713;--surface:#16211c;--ink:#e4ede8;--ink2:#9db1a8;--rule:#26352f;--acc:#3fd39c;--acc-t:#133a2c;--on:#06110c;--key:#1c2924;--crit:#ef6a62;--warn:#e5a93d;--warn-t:#3a2c10;--s1:#3fd39c;--s2:#5c7a6e;--grid:#26352f}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom));touch-action:manipulation}
+button,.chip,label,select,input{touch-action:manipulation}
 .wrap{max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 14px 0;display:grid;gap:9px}
 .pg{display:none}.pg.on{display:grid;gap:9px}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--key);border-radius:.8rem;padding:3px}
@@ -22,13 +24,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-app
 .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);display:flex;justify-content:space-between;align-items:center;margin-bottom:-3px}
 .lbl button{border:0;background:none;color:var(--acc);font-weight:600;font-size:.8rem;text-transform:none;letter-spacing:0;padding:0}
 .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.chip{border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:.7rem;padding:.5rem .25rem;font:500 .72rem/1.15 inherit;font-family:inherit;text-align:center;min-height:42px;cursor:pointer}
+.chip{border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:.7rem;padding:.5rem .25rem;font:500 .72rem/1.15 inherit;font-family:inherit;text-align:center;min-height:42px;cursor:pointer;-webkit-user-select:none;user-select:none}
 .chip.on{background:var(--acc-t);border-color:var(--acc);color:var(--acc);font-weight:650}
 .pay{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.pay .chip{min-height:38px;font-size:.74rem}
 .dates{display:flex;gap:6px}.dates .chip{flex:1;min-height:36px}
-input,select,textarea{width:100%;font:inherit;font-size:.9rem;padding:.55rem .7rem;border:1px solid var(--rule);border-radius:.7rem;background:var(--surface);color:var(--ink)}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:.55rem .7rem;border:1px solid var(--rule);border-radius:.7rem;background:var(--surface);color:var(--ink)}
 .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.keys button{border:0;background:var(--key);color:var(--ink);border-radius:.7rem;padding:.45rem 0;font:500 1.15rem ui-monospace,Consolas,monospace;cursor:pointer}
+.keys button{border:0;background:var(--key);color:var(--ink);border-radius:.7rem;padding:.45rem 0;font:500 1.15rem ui-monospace,Consolas,monospace;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .keys button:active{background:var(--rule)}
 .savebar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));background:var(--bg);padding:6px 0 4px;z-index:2;box-shadow:0 -8px 8px -6px var(--bg)}
 .savebar .msg{min-height:0;margin-bottom:2px}
@@ -44,12 +46,35 @@ input,select,textarea{width:100%;font:inherit;font-size:.9rem;padding:.55rem .7r
 .item:last-child{border:0}.item small{color:var(--ink2);font-size:.72rem}.item b{font-variant-numeric:tabular-nums;font-weight:600}
 .pill{display:inline-block;font-size:.68rem;font-weight:650;padding:.1rem .45rem;border-radius:999px;background:var(--warn-t);color:var(--warn)}
 .card{background:var(--surface);border:1px solid var(--rule);border-radius:1rem;padding:.85rem}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom))}
-.tabs button{border:0;background:none;color:var(--ink2);font-size:.72rem;padding:.3rem;cursor:pointer}.tabs button b{display:block;font-size:1.15rem;font-weight:500}
+.card h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);margin:0 0 .5rem}
+.card .hint{font-size:.78rem;color:var(--ink2);margin:-.3rem 0 .5rem}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
+.tabs button{border:0;background:none;color:var(--ink2);font-size:.7rem;padding:.3rem;cursor:pointer}.tabs button b{display:block;font-size:1.15rem;font-weight:500}
 .tabs .on{color:var(--acc);font-weight:700}
+/* análisis */
+.fil{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fil label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);display:block;margin-bottom:2px}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpi div{background:var(--bg);border-radius:.7rem;padding:.55rem .7rem}
+.kpi small{color:var(--ink2);font-size:.72rem;display:block}.kpi b{font-size:1.25rem;letter-spacing:-.01em}.kpi .d{font-size:.72rem;color:var(--ink2);display:block}
+.up{color:var(--crit);font-weight:650}.dn{color:var(--acc);font-weight:650}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px system-ui,sans-serif}
+.leg{display:flex;gap:.9rem;font-size:.76rem;color:var(--ink2);margin:.1rem 0 .3rem}.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem}
+.row{display:grid;grid-template-columns:minmax(0,9.5rem) 1fr auto;gap:.5rem;align-items:center;padding:.28rem 0;font-size:.82rem}
+.row .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .num{font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap;font-size:.76rem;text-align:right}
+.track{height:9px;background:var(--grid);border-radius:3px}.fill{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--s1)}.fill.over{background:var(--crit)}
+/* PIN */
+#lock{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px}
+#lock h1{font-size:1.1rem;margin:0}
+.dots{display:flex;gap:12px}.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink2)}.dots i.on{background:var(--ink);border-color:var(--ink)}
+.pk{display:grid;grid-template-columns:repeat(3,76px);gap:10px}.pk button{height:60px;border:0;border-radius:50%;background:var(--key);color:var(--ink);font:500 1.4rem ui-monospace,Consolas,monospace;-webkit-user-select:none;user-select:none}
+.pk button:active{background:var(--rule)}.pk .v{visibility:hidden}
+#lock .lk{border:0;background:none;color:var(--acc);font-size:.85rem;padding:.4rem}
 </style>
 </head>
 <body>
+<div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
+
 <div class="wrap">
 
 <section class="pg on" id="pg-reg">
@@ -78,52 +103,112 @@ input,select,textarea{width:100%;font:inherit;font-size:.9rem;padding:.55rem .7r
   <div class="msg" id="hmsg"></div>
 </section>
 
+<section class="pg" id="pg-ana">
+  <div class="card"><div class="fil">
+    <div><label for="aper">Periodo</label><select id="aper"></select></div>
+    <div><label for="agrp">Grupo</label><select id="agrp"></select></div></div></div>
+  <div class="card"><h2>Resumen</h2><div class="kpi" id="akpi"></div><div class="msg" id="amsg"></div></div>
+  <div class="card"><h2>Hallazgos</h2><div id="hall"></div></div>
+  <div class="card"><h2>Gasto por mes</h2><p class="hint">Toque una barra para elegir ese mes.</p><div id="ch-mes"></div></div>
+  <div class="card" id="c-acum"><h2>Acumulado del mes contra el anterior</h2><div class="leg"><span><i style="background:var(--s1)"></i>Este mes</span><span><i style="background:var(--s2)"></i>Mes anterior</span></div><div id="ch-acum"></div></div>
+  <div class="card"><h2>Por categoría</h2><p class="hint" id="cat-h"></p><div id="ch-cat"></div></div>
+  <div class="card"><h2>Por grupo</h2><div id="ch-grp"></div></div>
+  <div class="card"><h2>Día de la semana</h2><div id="ch-dia"></div></div>
+  <div class="card"><h2>Comercios</h2><div id="ch-com"></div></div>
+</section>
+
 <section class="pg" id="pg-cfg">
-  <div class="card"><div class="lbl">Conexión (se guarda solo en este teléfono)</div>
-    <div style="height:6px"></div>
+  <div class="card"><h2>Conexión (se guarda solo en este teléfono)</h2>
     <label class="lbl" for="url">URL del Apps Script de Gastos (/exec)</label>
     <input id="url" type="url" autocapitalize="off" autocorrect="off" spellcheck="false">
     <div style="height:8px"></div>
     <label class="lbl" for="llave">Llave de Gastos</label>
-    <input id="llave" type="password" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <input id="llave" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Solo para cambiarla o configurarla">
     <div style="height:8px"></div>
-    <button class="save" id="gcfg">Guardar y cargar categorías</button>
+    <label class="lbl" for="pin1">PIN de 6 dígitos (nuevo)</label>
+    <input id="pin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="••••••">
+    <div style="height:8px"></div>
+    <input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Repita el PIN">
+    <div style="height:8px"></div>
+    <button class="save" id="gcfg">Guardar</button>
     <div style="height:6px"></div>
     <button class="save sec" id="ping">Probar conexión</button>
+    <div style="height:6px"></div>
+    <button class="save sec" id="bloq">Bloquear ahora</button>
     <div class="msg" id="mcfg"></div></div>
 </section>
 </div>
 
-<nav class="tabs"><button class="on" data-p="reg"><b>＋</b>Registrar</button><button data-p="hoy"><b>◔</b>Hoy</button><button data-p="cfg"><b>⚙</b>Conexión</button></nav>
+<nav class="tabs"><button class="on" data-p="reg"><b>＋</b>Registrar</button><button data-p="hoy"><b>◔</b>Hoy</button><button data-p="ana"><b>▤</b>Análisis</button><button data-p="cfg"><b>⚙</b>Conexión</button></nav>
 
 <script>
+const PFX="g";
 const $=id=>document.getElementById(id);
 const rd=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
+const rm=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const ERR={llave:"Llave incorrecta",limite:"Demasiadas peticiones, espere un momento",valor:"Valor inválido",fecha:"Fecha inválida",medio:"Medio de pago inválido",
   categoria:"Categoría no válida (si es «Otros», elíjala de la lista completa)",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",foto_repetida:"Esa foto ya está guardada",ocupado:"Ocupado, reintente"};
 const fmt=n=>"$ "+Math.round(n).toLocaleString("es-CO");
+const cmp=n=>{const a=Math.abs(n);return (n<0?"-":"")+(a>=1e6?(a/1e6).toFixed(a>=1e7?0:1).replace(".",",")+" M":a>=1e3?Math.round(a/1e3)+" mil":Math.round(a))};
 const pad=n=>String(n).padStart(2,"0");
 const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-const cfg=()=>({url:rd("g_url").trim(),llave:rd("g_llave").trim()});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nuevoId=()=>"w-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
-let tipo="Gasto",v="0",sel=null,medio="",fechaSel="hoy",tdoc="factura",fotoB64="",catalogo=null;
+/* ===== PIN y llave cifrada (la llave nunca queda en claro en el teléfono) ===== */
+const TXT=new TextEncoder(),DEC=new TextDecoder();
+const toB=u=>btoa(String.fromCharCode.apply(null,new Uint8Array(u))),fromB=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const cripto=!!(window.crypto&&crypto.subtle);
+let LLAVE="",ultimoUso=Date.now(),ocultoDesde=0,pinBuf="",modoLock="entrar",pinPrimero="";
+async function derivar(pin,salt){const k=await crypto.subtle.importKey("raw",TXT.encode(pin),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:150000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function sellar(pin,txt){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await derivar(pin,salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,TXT.encode(txt));return toB(salt)+"."+toB(iv)+"."+toB(ct)}
+async function abrir(pin,blob){const p=blob.split("."),key=await derivar(pin,fromB(p[0]));
+  return DEC.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB(p[1])},key,fromB(p[2])))}
+function lockMostrar(m){modoLock=m;pinBuf="";pinPrimero="";$("lock").style.display="flex";pintaLock()}
+function pintaLock(){
+  $("ltit").textContent=modoLock==="entrar"?"Ingrese su PIN":modoLock==="crear"?"Cree un PIN de 6 dígitos":"Repita el PIN";
+  $("dots").innerHTML=[0,1,2,3,4,5].map(i=>`<i class="${i<pinBuf.length?"on":""}"></i>`).join("")}
+function lmsg(t){$("lmsg").textContent=t}
+$("pk").innerHTML=["1","2","3","4","5","6","7","8","9","","0","⌫"].map(k=>k===""?'<button class="v" type="button" tabindex="-1"></button>':`<button type="button" data-lk="${k}">${k}</button>`).join("");
+$("pk").onclick=async e=>{const b=e.target.closest("[data-lk]");if(!b)return;const k=b.dataset.lk;
+  if(k==="⌫")pinBuf=pinBuf.slice(0,-1);else if(pinBuf.length<6)pinBuf+=k;pintaLock();if(pinBuf.length===6)await lockProcesa()};
+async function lockProcesa(){
+  const bloq=Number(rd(PFX+"_lock")||0);if(bloq>Date.now()){lmsg("Bloqueado "+Math.ceil((bloq-Date.now())/60000)+" min por intentos fallidos");pinBuf="";pintaLock();return}
+  if(modoLock==="entrar"){
+    try{LLAVE=await abrir(pinBuf,rd(PFX+"_llavec"));wr(PFX+"_fails","0");desbloquear()}
+    catch(e){const n=Number(rd(PFX+"_fails")||0)+1;wr(PFX+"_fails",String(n));pinBuf="";
+      if(n>=5){wr(PFX+"_lock",String(Date.now()+15*60000));wr(PFX+"_fails","0");lmsg("Demasiados intentos: bloqueado 15 minutos")}else lmsg("PIN incorrecto ("+n+" de 5)");pintaLock()}
+  }else if(modoLock==="crear"){pinPrimero=pinBuf;pinBuf="";modoLock="confirmar";pintaLock();lmsg("")}
+  else{if(pinBuf!==pinPrimero){lmsg("No coinciden. Intente de nuevo.");modoLock="crear";pinBuf="";pintaLock();return}
+    const vieja=rd(PFX+"_llave");try{wr(PFX+"_llavec",await sellar(pinBuf,vieja));rm(PFX+"_llave");LLAVE=vieja;desbloquear()}catch(e){lmsg("No se pudo guardar el PIN")}}
+}
+function desbloquear(){$("lock").style.display="none";lmsg("");pinBuf="";ultimoUso=Date.now();iniciaApp()}
+function bloquear(){LLAVE="";MOV=null;lockMostrar("entrar")}
+$("forgot").onclick=()=>{if(confirm("Se borrará la llave guardada en este teléfono y tendrá que escribirla de nuevo. ¿Continuar?")){rm(PFX+"_llavec");rm(PFX+"_llave");LLAVE="";$("lock").style.display="none";irA("cfg")}};
+["click","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,()=>{ultimoUso=Date.now()},{passive:true}));
+setInterval(()=>{if(LLAVE&&Date.now()-ultimoUso>5*60000)bloquear()},20000);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)ocultoDesde=Date.now();else if(LLAVE&&Date.now()-ocultoDesde>2*60000)bloquear()});
+
+const cfg=()=>({url:rd(PFX+"_url").trim(),llave:LLAVE});
+let tipo="Gasto",v="0",sel=null,medio="",fechaSel="hoy",tdoc="factura",fotoB64="",catalogo=null,MOV=null,PRES=[],movAt=0;
 const MEDIOS=["Efectivo","Débito","Crédito","Transferencia"];
 
 /* ---- red ---- */
-async function post(o){const c=cfg();if(!c.url||!c.llave)throw new Error("Configure la conexión primero");
+async function post(o){const c=cfg();if(!c.url||!c.llave)throw new Error("Desbloquee la app o configure la conexión");
   const r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({llave:c.llave},o))});
   const j=await r.json();if(!j.ok)throw Object.assign(new Error(ERR[j.error]||("Error: "+j.error)),{api:true});return j}
-async function get(a){const c=cfg();if(!c.url||!c.llave)throw new Error("Configure la conexión primero");
-  const r=await fetch(c.url+"?accion="+a+"&llave="+encodeURIComponent(c.llave));
+async function get(a,extra){const c=cfg();if(!c.url||!c.llave)throw new Error("Desbloquee la app o configure la conexión");
+  const r=await fetch(c.url+"?accion="+a+(extra||"")+"&llave="+encodeURIComponent(c.llave));
   const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||("Error: "+j.error));return j}
 
 /* ---- cola sin conexión ---- */
 const cola=()=>{try{return JSON.parse(rd("g_cola")||"[]")}catch(e){return[]}};
 const guardaCola=a=>wr("g_cola",JSON.stringify(a));
 async function vaciarCola(){const q=cola();if(!q.length)return 0;const resto=[];let n=0;
-  for(const o of q){try{await post(o);n++}catch(e){if(e.api&&e.message.indexOf("ocupado")<0)continue;resto.push(o)}}
+  for(const o of q){try{await post(o);n++}catch(e){if(e.api&&e.message.indexOf("Ocupado")<0)continue;resto.push(o)}}
   guardaCola(resto);return n}
 
 /* ---- categorías ---- */
@@ -131,15 +216,15 @@ async function cargaCatalogo(){
   try{catalogo=await get("config");wr("g_cat",JSON.stringify(catalogo))}
   catch(e){try{catalogo=JSON.parse(rd("g_cat")||"null")}catch(x){catalogo=null}}
   pintaCats();
-  if(catalogo){$("coms").innerHTML=catalogo.comercios.map(c=>`<option value="${c.replace(/"/g,"&quot;")}">`).join("")}
+  if(catalogo){$("coms").innerHTML=catalogo.comercios.map(c=>`<option value="${esc(c)}">`).join("")}
 }
 function pintaCats(){
   if(!catalogo){$("cats").innerHTML='<div class="msg err" style="grid-column:1/-1">Configure la conexión para cargar las categorías.</div>';return}
   const esIng=tipo==="Ingreso";
   const lista=esIng?catalogo.categorias.filter(x=>x.g==="Ingreso"):catalogo.frecuentes;
-  $("cats").innerHTML=lista.map(x=>`<button type="button" class="chip ${sel&&sel.g===x.g&&sel.c===x.c?"on":""}" data-g="${x.g}" data-c="${x.c}">${x.c==="Otros"?x.g+" · Otros":x.c}</button>`).join("");
+  $("cats").innerHTML=lista.map(x=>`<button type="button" class="chip ${sel&&sel.g===x.g&&sel.c===x.c?"on":""}" data-g="${esc(x.g)}" data-c="${esc(x.c)}">${x.c==="Otros"?esc(x.g)+" · Otros":esc(x.c)}</button>`).join("");
   const grupos={};catalogo.categorias.filter(x=>esIng?x.g==="Ingreso":x.g!=="Ingreso").forEach(x=>(grupos[x.g]=grupos[x.g]||[]).push(x));
-  $("sel").innerHTML='<option value="">Todas las categorías…</option>'+Object.keys(grupos).map(g=>`<optgroup label="${g}">`+grupos[g].map(x=>`<option value="${g}|${x.c}">${x.c}</option>`).join("")+"</optgroup>").join("");
+  $("sel").innerHTML='<option value="">Todas las categorías…</option>'+Object.keys(grupos).map(g=>`<optgroup label="${esc(g)}">`+grupos[g].map(x=>`<option value="${esc(g)}|${esc(x.c)}">${esc(x.c)}</option>`).join("")+"</optgroup>").join("");
 }
 function pintaBtns(){
   $("pay").innerHTML=MEDIOS.map(m=>`<button type="button" class="chip ${medio===m?"on":""}" data-m="${m}">${m==="Transferencia"?"Transf.":m}</button>`).join("");
@@ -161,6 +246,9 @@ document.addEventListener("click",e=>{
   if(f){fechaSel=f.dataset.f;pintaBtns()}
   if(d){tdoc=d.dataset.d;pintaBtns()}
 });
+// evita el zoom por doble toque rápido en el teclado y botones
+let ultimoToque=0;document.addEventListener("touchend",e=>{const t=Date.now();if(t-ultimoToque<350&&e.target.closest("button,.chip,label"))e.preventDefault();ultimoToque=t},{passive:false});
+["gesturestart","gesturechange","gestureend"].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
 
 /* ---- foto ---- */
 $("foto").onchange=async e=>{const f=e.target.files[0];if(!f){fotoB64="";$("prev").style.display="none";pintaBtns();return}
@@ -183,7 +271,7 @@ $("save").onclick=async()=>{
   const o={accion:"gasto",id:nuevoId(),valor:valor,tipo:tipo,grupo:sel.g,categoria:sel.c,medio:medio||undefined,comercio:$("com").value.trim()||undefined,fecha:fecha,origen:"pagina"};
   if(fotoB64){o.foto_b64=fotoB64;o.tipo_doc=tdoc}
   msg("Guardando...",0);$("save").disabled=true;
-  try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);limpia()}
+  try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);limpia();MOV=null}
   catch(e){
     if(e.api){msg(e.message,1)}
     else{const q=cola();q.push(o);if(guardaCola(q)){msg("Sin conexión: quedó en cola ("+q.length+"). Se envía al abrir con señal.",2);limpia()}else msg("Sin conexión y no se pudo guardar en cola",1)}
@@ -200,22 +288,152 @@ async function hoy(){
     const dia=r.movimientos.filter(m=>m.fecha===h&&m.tipo==="Gasto");
     $("htot").textContent=fmt(dia.reduce((s,m)=>s+m.valor,0));$("hsub").textContent=dia.length+" movimientos hoy";
     const pend=r.movimientos.filter(m=>m.estado==="pendiente").length;
-    $("hlist").innerHTML=r.movimientos.slice(0,25).map(m=>`<div class="item"><div>${m.c}${m.estado==="pendiente"?' <span class="pill">por confirmar</span>':""}${m.foto?" 📎":""}<br><small>${m.fecha}${m.comercio?" · "+m.comercio:""}${m.medio?" · "+m.medio:""}</small></div><b>${m.tipo==="Ingreso"?"+":""}${fmt(m.valor)}</b></div>`).join("")||"<div class='item'>Sin movimientos.</div>";
-    if(pend)$("hmsg").textContent=pend+" por confirmar entre los últimos movimientos."}
+    $("hlist").innerHTML=r.movimientos.slice(0,25).map(m=>`<div class="item"><div>${esc(m.c)}${m.estado==="pendiente"?' <span class="pill">por confirmar</span>':""}${m.foto?" 📎":""}<br><small>${m.fecha}${m.comercio?" · "+esc(m.comercio):""}${m.medio?" · "+m.medio:""}</small></div><b>${m.tipo==="Ingreso"?"+":""}${fmt(m.valor)}</b></div>`).join("")||"<div class='item'>Sin movimientos.</div>";
+    $("hmsg").className="msg";$("hmsg").textContent=pend?pend+" por confirmar entre los últimos movimientos.":""}
   catch(e){$("hmsg").textContent=e.message;$("hmsg").className="msg err"}
 }
 
+/* ---- Análisis ---- */
+const MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const labM=mi=>{const y=Math.floor((mi-1)/12),m=mi-y*12;return MESES[m-1]+" "+String(y).slice(2)};
+const labML=mi=>{const y=Math.floor((mi-1)/12),m=mi-y*12;return MESES[m-1]+" "+y};
+const sum=a=>a.reduce((s,r)=>s+r.v,0);
+const agrupa=(a,f)=>{const o={};a.forEach(r=>{const k=f(r);(o[k]=o[k]||{v:0,n:0});o[k].v+=r.v;o[k].n++});return o};
+async function cargaMov(){
+  if(MOV&&Date.now()-movAt<120000)return;
+  const r=await get("movimientos");
+  MOV=r.movimientos.map(m=>{m.y=+m.f.slice(0,4);m.mo=+m.f.slice(5,7);m.d=+m.f.slice(8,10);m.mi=m.y*12+m.mo;m.dow=(new Date(m.f+"T12:00:00").getDay()+6)%7;return m});
+  PRES=r.presupuesto;movAt=Date.now();
+}
+function armaFiltros(){
+  if($("aper").options.length)return;
+  const hoyD=new Date(),cur=hoyD.getFullYear()*12+hoyD.getMonth()+1,mins=Math.min.apply(null,MOV.map(m=>m.mi)),opts=[];
+  for(let m=cur;m>=Math.max(mins,cur-17);m--)opts.push(["m"+m,labML(m)]);
+  opts.push(["l3","Últimos 3 meses"],["y","Año en curso"],["all","Todo el historial"]);
+  $("aper").innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");
+  const grs=Array.from(new Set(MOV.filter(m=>m.t==="G").map(m=>m.g))).sort();
+  $("agrp").innerHTML='<option value="">Todos</option>'+grs.map(g=>`<option>${esc(g)}</option>`).join("");
+}
+function rangoP(v,cur,mins){if(v[0]==="m"){const m=+v.slice(1);return[m,m]}if(v==="l3")return[cur-2,cur];if(v==="y")return[Math.floor((cur-1)/12)*12+1,cur];return[mins,cur]}
+function deltaTxt(x,y,bajaEsBueno){if(!y)return"";const p=(x-y)/y*100;const bad=bajaEsBueno?p>0:p<0;return `<span class="${bad?"up":"dn"}">${p>=0?"▲":"▼"} ${Math.abs(p).toFixed(0)}%</span>`}
+function barsH(items,total,fmtv){const mx=Math.max.apply(null,items.map(i=>i.v).concat([1]));
+  return items.map(i=>`<div class="row"><span class="n">${esc(i.n)}</span><span class="track"><span class="fill ${i.over?"over":""}" style="width:${i.v/mx*100}%"></span></span><span class="num">${i.txt||cmp(i.v)}${total?" · "+Math.round(i.v/total*100)+"%":""}</span></div>`).join("")||'<div class="hint">Sin datos en este periodo.</div>'}
+function chMes(a,b,grp){
+  const el=$("ch-mes"),W=Math.max(el.clientWidth,300),H=190,L=40,B=24,T=8,R=6,hoyD=new Date(),cur=hoyD.getFullYear()*12+hoyD.getMonth()+1;
+  const ms=[];for(let m=cur-11;m<=cur;m++)ms.push(m);
+  const val=ms.map(m=>sum(MOV.filter(r=>r.t==="G"&&r.mi===m&&(!grp||r.g===grp))));
+  const mx=Math.max.apply(null,val.concat([1])),Y=v=>T+(H-T-B)*(1-v/mx),bw=Math.min(24,(W-L-R)/12*.62),X=i=>L+(i+.5)*(W-L-R)/12;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gasto por mes">`;
+  for(let k=0;k<=3;k++){const v2=mx*k/3;s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v2)}" y2="${Y(v2)}" stroke="var(--grid)"/><text x="${L-4}" y="${Y(v2)+3}" text-anchor="end">${cmp(v2)}</text>`}
+  ms.forEach((m,i)=>{const sl=m>=a&&m<=b;s+=`<g data-m="${m}" style="cursor:pointer"><rect x="${X(i)-(W-L-R)/24}" y="${T}" width="${(W-L-R)/12}" height="${H-T-B}" fill="transparent"/><rect x="${X(i)-bw/2}" y="${Y(val[i])}" width="${bw}" height="${Math.max(Y(0)-Y(val[i]),0)}" rx="3" fill="${sl?"var(--s1)":"var(--s2)"}"><title>${labML(m)}: ${fmt(val[i])}</title></rect></g>`;
+    if(i%2===0||W>420)s+=`<text x="${X(i)}" y="${H-7}" text-anchor="middle">${MESES[(m-1)%12]}</text>`});
+  el.innerHTML=s+`<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--axis,var(--rule))"/></svg>`;
+}
+function chAcum(rowsA,rowsB,ndias){
+  const el=$("ch-acum"),W=Math.max(el.clientWidth,300),H=170,L=40,B=22,T=8,R=8;
+  const cum=r=>{const a=Array(ndias+1).fill(0);r.forEach(x=>a[x.d]+=x.v);for(let i=1;i<=ndias;i++)a[i]+=a[i-1];return a};
+  const A=cum(rowsA),Bc=cum(rowsB),hoyD=new Date().getDate(),lim=(rowsA.length&&rowsA[0].mi===new Date().getFullYear()*12+new Date().getMonth()+1)?hoyD:ndias;
+  const mx=Math.max(A[lim],Bc[ndias],1),X=d=>L+(d-1)/(ndias-1)*(W-L-R),Y=v=>T+(H-T-B)*(1-v/mx);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Acumulado del mes">`;
+  for(let k=0;k<=3;k++){const v2=mx*k/3;s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v2)}" y2="${Y(v2)}" stroke="var(--grid)"/><text x="${L-4}" y="${Y(v2)+3}" text-anchor="end">${cmp(v2)}</text>`}
+  [1,Math.round(ndias/2),ndias].forEach((d,i)=>s+=`<text x="${X(d)}" y="${H-6}" text-anchor="${i===0?"start":i===2?"end":"middle"}">día ${d}</text>`);
+  const pts=(arr,n)=>Array.from({length:n},(_,i)=>X(i+1)+","+Y(arr[i+1])).join(" ");
+  s+=`<polyline points="${pts(Bc,ndias)}" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/><polyline points="${pts(A,lim)}" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  $("ch-acum").innerHTML=s+"</svg>";
+}
+async function analisis(){
+  $("amsg").textContent="";
+  try{await cargaMov()}catch(e){$("amsg").textContent=e.message;$("amsg").className="msg err";return}
+  $("amsg").className="msg";armaFiltros();
+  const hoyD=new Date(),cur=hoyD.getFullYear()*12+hoyD.getMonth()+1,mins=Math.min.apply(null,MOV.map(m=>m.mi));
+  const [a,b]=rangoP($("aper").value,cur,mins),len=b-a+1,pa=a-len,pb=a-1,grp=$("agrp").value;
+  const unMes=a===b,corteMesActual=unMes&&a===cur;
+  const inR=(x,y,fn)=>MOV.filter(r=>r.mi>=x&&r.mi<=y&&(!fn||fn(r)));
+  const G=inR(a,b,r=>r.t==="G"&&(!grp||r.g===grp)),
+        P=inR(pa,pb,r=>r.t==="G"&&(!grp||r.g===grp)&&(!corteMesActual||r.d<=hoyD.getDate())),
+        I=inR(a,b,r=>r.t==="I"),gt=sum(G),pt=sum(P),it=sum(I);
+  const diasTrans=(()=>{const ini=new Date(Math.floor((a-1)/12),(a-1)%12,1),fin=new Date(Math.floor((b-1)/12),(b-1)%12+1,0),lim=fin<hoyD?fin:hoyD;return Math.max(1,Math.round((lim-ini)/864e5)+1)})();
+  $("akpi").innerHTML=`<div><small>Gasto</small><b>${fmt(gt)}</b><span class="d">${pt?deltaTxt(gt,pt,true)+" "+(corteMesActual?"vs mismo corte del mes anterior":"vs periodo anterior"):"Sin periodo anterior"}</span></div>
+   <div><small>Promedio diario</small><b>${fmt(gt/diasTrans)}</b><span class="d">${G.length} movimientos</span></div>
+   <div><small>Ingreso</small><b>${it?fmt(it):"—"}</b><span class="d">${it?"Flujo "+fmt(it-sum(inR(a,b,r=>r.t==="G"))):"Sin ingresos registrados"}</span></div>
+   <div><small>Periodo anterior</small><b>${fmt(pt)}</b><span class="d">${corteMesActual?"hasta el día "+hoyD.getDate():labM(pa)+(len>1?" – "+labM(pb):"")}</span></div>`;
+  chMes(a,b,grp);
+  $("c-acum").style.display=unMes?"block":"none";
+  if(unMes){const nd=new Date(Math.floor((a-1)/12),(a-1)%12+1,0).getDate(),ndp=new Date(Math.floor((pa-1)/12),(pa-1)%12+1,0).getDate();
+    chAcum(G,inR(pa,pa,r=>r.t==="G"&&(!grp||r.g===grp)),Math.max(nd,ndp))}
+  // categorías con comparación y tope
+  const clave=r=>r.g+"|"+r.c,pc=agrupa(P,clave),cs=agrupa(G,clave),tope={};PRES.forEach(x=>tope[x.g+"|"+x.c]=x.t);
+  const items=Object.keys(cs).map(k=>({k:k,v:cs[k].v,p:(pc[k]||{v:0}).v})).sort((x,y)=>y.v-x.v).slice(0,12).map(x=>{
+    const [g,c]=x.k.split("|"),t=tope[x.k]?tope[x.k]*len:0,over=t&&x.v>t;
+    return {n:(c==="Otros"?g+" · Otros":c),v:x.v,over:over,txt:cmp(x.v)+(x.p?" "+deltaTxt(x.v,x.p,true):"")+(over?' <span class="up">▲ tope</span>':"")}});
+  $("cat-h").textContent="Con la variación frente al periodo anterior"+(PRES.length?" y aviso si pasó el tope":"")+".";
+  $("ch-cat").innerHTML=barsH(items,gt);
+  $("ch-grp").innerHTML=barsH(Object.entries(agrupa(G,r=>r.g)).sort((x,y)=>y[1].v-x[1].v).map(([n,o])=>({n:n,v:o.v})),gt);
+  const dow=Array(7).fill(0);G.forEach(r=>dow[r.dow]+=r.v);const N=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],mxd=Math.max.apply(null,dow.concat([1]));
+  $("ch-dia").innerHTML=`<svg viewBox="0 0 300 130" role="img" aria-label="Gasto por día de la semana">`+dow.map((x,i)=>{const h=100*x/mxd,cx=21+i*43;return `<rect x="${cx-14}" y="${108-h}" width="28" height="${h}" rx="3" fill="${x===mxd&&x>0?"var(--s1)":"var(--s2)"}"><title>${N[i]}: ${fmt(x)}</title></rect><text x="${cx}" y="124" text-anchor="middle">${N[i]}</text>`}).join("")+"</svg>";
+  $("ch-com").innerHTML=barsH(Object.entries(agrupa(G.filter(r=>r.com),r=>r.com.replace(/\s+/g," ").trim())).sort((x,y)=>y[1].v-x[1].v).slice(0,8).map(([n,o])=>({n:n,v:o.v})),gt);
+  hallazgos({G:G,P:P,gt:gt,pt:pt,a:a,b:b,pa:pa,len:len,grp:grp,cs:cs,pc:pc,tope:tope,dow:dow,unMes:unMes,corteMesActual:corteMesActual,hoyD:hoyD,inR:inR});
+}
+function hallazgos(c){
+  const L=[],nombre=k=>{const p=k.split("|");return p[1]==="Otros"?p[0]+" · Otros":p[1]};
+  if(!c.G.length){$("hall").innerHTML='<div class="hint">Sin movimientos en este periodo.</div>';return}
+  if(c.corteMesActual){
+    const dm=new Date(Math.floor((c.a-1)/12),(c.a-1)%12+1,0).getDate(),t=c.hoyD.getDate(),rest=dm-t;
+    const rec=c.G.filter(r=>r.d>t-14),base=t>=14?sum(rec)/14:c.gt/Math.max(1,t);
+    L.push(`<b>Proyección de cierre del mes:</b> entre ${cmp(c.gt+base*rest*0.8)} y ${cmp(c.gt+base*rest*1.2)}, con un ritmo reciente de ${cmp(base)} por día. La proyección mejora a medida que hay más registros.`);
+    const prevTot=sum(c.inR(c.pa,c.pa,r=>r.t==="G"&&(!c.grp||r.g===c.grp)));if(prevTot)L.push(`El mes anterior cerró en ${cmp(prevTot)}.`);
+  }
+  if(c.unMes){ // contra el promedio de los 6 meses previos (mismo corte si es el mes en curso)
+    const tot=[];for(let m=c.a-6;m<=c.a-1;m++){const f=c.inR(m,m,r=>r.t==="G"&&(!c.grp||r.g===c.grp)&&(!c.corteMesActual||r.d<=c.hoyD.getDate()));if(f.length)tot.push(sum(f))}
+    if(tot.length>=3){const pr=tot.reduce((s,x)=>s+x,0)/tot.length;L.push(`Frente a su promedio de los últimos ${tot.length} meses${c.corteMesActual?" (mismo corte)":""}: ${deltaTxt(c.gt,pr,true)} (${cmp(pr)}).`)}
+  }
+  const ks=Array.from(new Set(Object.keys(c.cs).concat(Object.keys(c.pc)))).map(k=>({k:k,d:(c.cs[k]?c.cs[k].v:0)-(c.pc[k]?c.pc[k].v:0)}));
+  const sube=ks.filter(x=>x.d>=20000).sort((x,y)=>y.d-x.d)[0],baja=ks.filter(x=>x.d<=-20000).sort((x,y)=>x.d-y.d)[0];
+  if(sube)L.push(`<b>Lo que más subió:</b> ${esc(nombre(sube.k))}, ${cmp(sube.d)} más que en el periodo anterior.`);
+  if(baja)L.push(`<b>Lo que más bajó:</b> ${esc(nombre(baja.k))}, ${cmp(-baja.d)} menos que en el periodo anterior.`);
+  const top3=Object.values(c.cs).map(o=>o.v).sort((x,y)=>y-x).slice(0,3).reduce((s,x)=>s+x,0);
+  L.push(`Las 3 categorías principales concentran el ${Math.round(top3/c.gt*100)}% del gasto.`);
+  const pq=c.G.filter(r=>r.v<=20000),pqv=sum(pq);
+  L.push(`<b>Gastos pequeños</b> (de $20.000 o menos): ${pq.length} movimientos, el ${Math.round(pq.length/c.G.length*100)}% de los registros y solo el ${Math.round(pqv/c.gt*100)}% del dinero (${cmp(pqv)}).`);
+  const fechasDow=Array.from({length:7},()=>new Set());c.G.forEach(r=>fechasDow[r.dow].add(r.f));
+  const N=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"],pro=c.dow.map((v,i)=>fechasDow[i].size?v/fechasDow[i].size:0),mx=Math.max.apply(null,pro);
+  if(mx>0&&fechasDow.filter(s=>s.size>0).length>=3)L.push(`El día más costoso en promedio es el <b>${N[pro.indexOf(mx)]}</b> (${cmp(mx)} por ese día).`);
+  const pasados=Object.keys(c.cs).filter(k=>c.tope[k]&&c.cs[k].v>c.tope[k]*c.len).map(k=>nombre(k));
+  if(pasados.length)L.push(`<b class="up">Pasaron su tope:</b> ${pasados.map(esc).join(", ")}.`);
+  $("hall").innerHTML=L.map(t=>`<p style="margin:.35rem 0;font-size:.9rem">• ${t}</p>`).join("");
+}
+$("aper").onchange=analisis;$("agrp").onchange=analisis;
+$("ch-mes").addEventListener("click",e=>{const g=e.target.closest("[data-m]");if(g){$("aper").value="m"+g.dataset.m;analisis()}});
+
 /* ---- navegación y configuración ---- */
-document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;
-  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
-  document.querySelectorAll(".pg").forEach(p=>p.classList.toggle("on",p.id==="pg-"+b.dataset.p));
-  if(b.dataset.p==="hoy")hoy()};
-$("gcfg").onclick=async()=>{const ok=wr("g_url",$("url").value.trim())&&wr("g_llave",$("llave").value.trim());
-  $("mcfg").className="msg";$("mcfg").textContent=ok?"Guardado. Cargando categorías...":"No se pudo guardar";await cargaCatalogo();$("mcfg").textContent=catalogo?"Listo: "+catalogo.categorias.length+" categorías cargadas.":"No se pudo cargar (revise URL y llave)"};
-$("ping").onclick=async()=>{$("mcfg").textContent="Probando...";try{const t=performance.now();await get("ping");$("mcfg").textContent="Conexión correcta ("+Math.round(performance.now()-t)+" ms)";$("mcfg").className="msg ok"}catch(e){$("mcfg").textContent=e.message;$("mcfg").className="msg err"}};
-$("url").value=rd("g_url");$("llave").value=rd("g_llave");
-pintaBtns();cargaCatalogo();vaciarCola().catch(()=>{});
-if(!cfg().url)document.querySelector('[data-p="cfg"]').click();
+function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
+  document.querySelectorAll(".pg").forEach(x=>x.classList.toggle("on",x.id==="pg-"+p));
+  if(p==="hoy")hoy();if(p==="ana")analisis()}
+document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-p]");if(b)irA(b.dataset.p)};
+$("gcfg").onclick=async()=>{
+  const url=$("url").value.trim(),llave=$("llave").value.trim(),p1=$("pin1").value,p2=$("pin2").value,m=$("mcfg");m.className="msg err";
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url)){m.textContent="La URL debe terminar en /exec";return}
+  if(!cripto){m.textContent="Este navegador no permite cifrar la llave. Abra la página desde Safari actualizado.";return}
+  if(llave||!rd(PFX+"_llavec")){ // hay llave nueva, o aún no hay ninguna guardada
+    if(!llave){m.textContent="Escriba la llave";return}
+    if(!/^\d{6}$/.test(p1)){m.textContent="El PIN debe tener exactamente 6 dígitos";return}
+    if(p1!==p2){m.textContent="Los dos PIN no coinciden";return}
+    try{wr(PFX+"_llavec",await sellar(p1,llave));rm(PFX+"_llave");LLAVE=llave}catch(e){m.textContent="No se pudo cifrar la llave";return}
+  }else if(p1){m.textContent="Para cambiar el PIN escriba también la llave";return}
+  wr(PFX+"_url",url);$("llave").value="";$("pin1").value="";$("pin2").value="";m.className="msg ok";m.textContent="Guardado. Cargando categorías...";
+  await cargaCatalogo();m.textContent=catalogo?"Listo: "+catalogo.categorias.length+" categorías cargadas.":"Guardado, pero no se pudo cargar (revise URL y llave)";
+};
+$("ping").onclick=async()=>{const m=$("mcfg");m.className="msg";m.textContent="Probando...";try{const t=performance.now();await get("ping");m.textContent="Conexión correcta ("+Math.round(performance.now()-t)+" ms)";m.className="msg ok"}catch(e){m.textContent=e.message;m.className="msg err"}};
+$("bloq").onclick=()=>{if(rd(PFX+"_llavec"))bloquear();else{$("mcfg").className="msg err";$("mcfg").textContent="Aún no hay PIN configurado"}};
+$("url").value=rd(PFX+"_url");
+
+function iniciaApp(){pintaBtns();cargaCatalogo();vaciarCola().catch(()=>{});irA("reg")}
+(function arranque(){
+  pintaBtns();
+  if(rd(PFX+"_llavec"))lockMostrar("entrar");
+  else if(rd(PFX+"_llave")&&rd(PFX+"_url")&&cripto)lockMostrar("crear"),lmsg("Proteja la app con un PIN. La llave quedará cifrada.");
+  else irA("cfg");
+})();
 </script>
 </body>
 </html>
