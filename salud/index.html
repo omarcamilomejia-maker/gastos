@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-04.9">
+<meta name="app-version" content="2026-11-07.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -75,7 +75,7 @@ textarea{min-height:64px;resize:vertical}
 .save{width:100%;border:0;background:var(--acc);color:var(--on);border-radius:.9rem;padding:.8rem;font-size:1rem;font-weight:700;margin-top:.7rem;cursor:pointer}
 .save.sec{background:var(--key);color:var(--ink)}
 .msg{font-size:.85rem;margin-top:.4rem;min-height:1.2em}.msg.err{color:var(--crit)}.msg.ok{color:var(--good)}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
 .tabs button{border:0;background:none;color:var(--ink2);font-size:.72rem;padding:.3rem;cursor:pointer}.tabs button b{display:block;font-size:1.15rem;font-weight:500}
 .tabs .on{color:var(--acc);font-weight:700}
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpi>div{background:var(--bg);border-radius:.7rem;padding:.55rem .7rem}
@@ -92,6 +92,15 @@ th,td{padding:.4rem .3rem;border-bottom:1px solid var(--rule);text-align:right}t
 input[type=file]{display:none}
 .b{display:inline-block}
 .chipfoto{display:flex;gap:8px;flex-wrap:wrap}
+.hd{border:1px solid var(--rule);border-radius:1rem;background:var(--surface);padding:.7rem .8rem;margin-bottom:8px}
+.hd h3{margin:0 0 .35rem;font-size:.95rem}.hd.vac{opacity:.75}
+.chp{display:inline-block;font-size:.72rem;border-radius:99px;padding:.15rem .55rem;margin:0 4px 4px 0;border:1px solid var(--rule);color:var(--ink2)}
+.chp.ok{background:var(--acc-t);border-color:var(--acc);color:var(--acc);font-weight:650}
+.hr{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;border-top:1px solid var(--rule);padding:.45rem 0;font-size:.85rem}
+.hr button{flex:none;border:1px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:.6rem;padding:.35rem .6rem;font-size:.8rem}
+.hmas{border:1px dashed var(--rule);background:none;color:var(--acc);border-radius:.6rem;padding:.4rem .7rem;font-size:.82rem;margin-top:.3rem}
+#edit{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:20;overflow:auto;padding:16px}
+#edit>div{background:var(--surface);border-radius:1rem;padding:1rem;max-width:520px;margin:0 auto}
 /* PIN */
 #lock{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;touch-action:none;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 #lock h1{font-size:1.25rem;margin:0}
@@ -190,6 +199,13 @@ input[type=file]{display:none}
     <p style="font-size:.82rem;color:var(--ink2)"><b>Neto:</b> consumo − calorías del ejercicio. Es un indicador de referencia, no un diagnóstico ni una prescripción.</p></details></div>
 </section>
 
+<section class="pg" id="pg-his">
+  <div class="card"><h2>Historial de registros</h2>
+    <div class="btns" id="hrango"></div><div id="hres" style="margin-top:.6rem"></div><div class="msg" id="hmsg"></div></div>
+  <div id="hlista"></div>
+</section>
+<div id="edit"><div id="edit-body"></div></div>
+
 <section class="pg" id="pg-sem">
   <div class="card"><h2>Hacia la meta</h2><div class="kpi" id="kpi"></div><div id="meta"></div></div>
   <div class="card"><h2>Últimos 7 días</h2><div id="sem"></div></div>
@@ -211,7 +227,7 @@ input[type=file]{display:none}
 </section>
 </div>
 
-<nav class="tabs"><button class="on" data-t="reg"><b>＋</b>Registrar</button><button data-t="ana"><b>↘</b>Análisis</button><button data-t="sem"><b>▤</b>Semana</button><button data-t="cfg"><b>⚙</b>Conexión</button></nav>
+<nav class="tabs"><button class="on" data-t="reg"><b>＋</b>Registrar</button><button data-t="ana"><b>↘</b>Análisis</button><button data-t="his"><b>☰</b>Historial</button><button data-t="sem"><b>▤</b>Semana</button><button data-t="cfg"><b>⚙</b>Conexión</button></nav>
 
 <script>
 const PFX="sl";
@@ -225,7 +241,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-04.9";
+const APP_V="2026-11-07.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -259,7 +275,7 @@ const di=s=>{const p=s.split("-").map(Number);return Math.floor(Date.UTC(p[0],p[
 const dIso=n=>{const d=new Date(n*864e5);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())};
 const ERR={llave:"Llave incorrecta",limite:"Demasiadas peticiones, espere un momento",fecha:"Fecha inválida (máximo 120 días atrás, no futura)",vacio:"Escriba al menos un dato",
   presion:"Revise la tensión: sistólica mayor que diastólica",peso_kg:"Peso fuera de rango",pulso:"Pulso fuera de rango",actividad:"Elija la actividad",actividad_min:"Escriba los minutos",hora:"Hora inválida",
-  comida:"Elija la comida",descripcion:"Escriba qué comió",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",ocupado:"Ocupado, reintente",intensidad:"Intensidad inválida",kcal_gasto:"Calorías de ejercicio fuera de rango",kcal_est:"Calorías fuera de rango",proteina_g_est:"Proteína fuera de rango"};
+  comida:"Elija la comida",descripcion:"Escriba qué comió",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",ocupado:"Ocupado, reintente",intensidad:"Intensidad inválida",no_existe:"Ese registro ya no existe",tipo:"Tipo inválido",id:"Registro inválido",kcal_gasto:"Calorías de ejercicio fuera de rango",kcal_est:"Calorías fuera de rango",proteina_g_est:"Proteína fuera de rango"};
 
 /* ===== PIN y llave cifrada ===== */
 const TXT=new TextEncoder(),DEC=new TextDecoder();
@@ -514,6 +530,59 @@ function hallazgosSalud(D,a,hoy,A){
   $("hall").innerHTML=L.map(t=>`<p style="margin:.35rem 0;font-size:.9rem">• ${t}</p>`).join("")+'<p style="margin:.6rem 0 0;font-size:.75rem;color:var(--ink2)">Información orientativa; no reemplaza la valoración de un profesional de la salud.</p>';
 }
 
+/* ===== Historial: ver, corregir, borrar y agregar registros de días anteriores ===== */
+let hRango=14;
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const DSEM=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const NOMC={desayuno:"Desayuno",media_manana:"Media mañana",almuerzo:"Almuerzo",merienda:"Merienda",cena:"Cena",extra:"Extra"};
+function etiquetaDia(n){const d=new Date(n*864e5);return DSEM[d.getUTCDay()]+" "+d.getUTCDate()+" "+MESES[d.getUTCMonth()]}
+async function historial(){
+  btns("hrango",[["7","7 días"],["14","14 días"],["30","30 días"],["60","60 días"]],()=>String(hRango),v=>{hRango=v===""?14:Number(v);historial()});
+  msg("hmsg","");if(!cache)$("hlista").innerHTML=LDR;let D;try{D=await datos()}catch(e){msg("hmsg",e.message,"err");$("hlista").innerHTML="";return}
+  const hoy=di(iso(new Date())),dias={};
+  D.med.forEach(x=>{(dias[x.fecha]=dias[x.fecha]||{m:[],c:[]}).m.push(x)});D.com.forEach(x=>{(dias[x.fecha]=dias[x.fecha]||{m:[],c:[]}).c.push(x)});
+  let cPeso=0,cTen=0,cCom=0,cAct=0;const html=[];
+  for(let n=hoy;n>hoy-hRango;n--){const f=dIso(n),o=dias[f]||{m:[],c:[]};
+    const peso=o.m.some(x=>x.peso_kg!==""),ten=o.m.some(x=>x.presion_sis!==""),act=o.m.some(x=>Number(x.actividad_min)>0),tipos=new Set(o.c.map(x=>x.comida)).size;
+    if(peso)cPeso++;if(ten)cTen++;if(act)cAct++;if(tipos>=3)cCom++;
+    const lista=o.m.sort((a,b)=>(a.hora||"")<(b.hora||"")?-1:1).map(x=>{const p=[];
+      if(x.peso_kg!=="")p.push("Peso "+f1(Number(x.peso_kg))+" kg");if(x.presion_sis!=="")p.push("Tensión "+x.presion_sis+"/"+x.presion_dia+(x.pulso!==""?" · pulso "+x.pulso:""));
+      if(Number(x.actividad_min)>0)p.push(esc(x.actividad)+" "+x.actividad_min+" min"+(x.intensidad?" ("+esc(x.intensidad)+")":"")+(x.kcal_gasto!==""?" ≈ "+x.kcal_gasto+" kcal":""));
+      if(x.notas)p.push(esc(x.notas));if(!p.length)p.push("Registro");
+      return `<div class="hr"><div><b>${esc(x.hora||"")}</b> ${p.join(" · ")}</div><button data-ed="medida" data-id="${esc(x.id)}">Editar</button></div>`}).join("")+
+      o.c.map(x=>`<div class="hr"><div><b>${NOMC[x.comida]||esc(x.comida)}</b>: ${esc(x.descripcion)}${x.kcal_est!==""?" · "+x.kcal_est+" kcal":""}${x.foto_id?" · 📷":""}</div><button data-ed="comida" data-id="${esc(x.id)}">Editar</button></div>`).join("");
+    html.push(`<div class="hd ${lista?"":"vac"}"><h3>${etiquetaDia(n)}${n===hoy?" · hoy":""}</h3>
+      <span class="chp ${peso?"ok":""}">${peso?"✓ ":""}Peso</span><span class="chp ${ten?"ok":""}">${ten?"✓ ":""}Tensión</span><span class="chp ${tipos>=3?"ok":""}">${tipos>=3?"✓ ":""}Comidas ${tipos}</span><span class="chp ${act?"ok":""}">${act?"✓ ":""}Actividad</span>
+      ${lista||'<div style="font-size:.85rem;color:var(--ink2)">Sin registros este día.</div>'}<button class="hmas" data-add="${f}">＋ Agregar a este día</button></div>`)}
+  $("hres").innerHTML=`<div style="font-size:.88rem">En los últimos ${hRango} días: <b>peso ${cPeso}</b> · <b>tensión ${cTen}</b> · <b>comidas completas (3 o más) ${cCom}</b> · <b>actividad ${cAct}</b>.</div>`;
+  $("hlista").innerHTML=html.join("")}
+$("hlista").onclick=e=>{const b=e.target.closest("[data-ed]"),a=e.target.closest("[data-add]");
+  if(a){fechaSel="otra";$("fecha").value=a.dataset.add;irA("reg");$("fecha").style.display="block";window.scrollTo(0,0);return}
+  if(b)abreEdicion(b.dataset.ed,b.dataset.id)};
+function abreEdicion(tipo,id){const D=cache;if(!D)return;const x=(tipo==="medida"?D.med:D.com).find(r=>r.id===id);if(!x)return;
+  const sel=(idn,ops,v)=>`<select id="${idn}">${ops.map(([k,t])=>`<option value="${k}"${k===v?" selected":""}>${t}</option>`).join("")}</select>`;
+  let h=`<h2 style="margin-top:0">Corregir registro</h2><label for="ed-fecha">Fecha</label><input id="ed-fecha" type="date" value="${esc(x.fecha)}">`;
+  if(tipo==="medida")h+=`<label for="ed-hora">Hora</label><input id="ed-hora" type="time" value="${esc(x.hora||"")}">
+    <div class="g2"><div><label for="ed-peso">Peso (kg)</label><input id="ed-peso" inputmode="decimal" value="${esc(x.peso_kg)}"></div><div><label for="ed-pul">Pulso</label><input id="ed-pul" inputmode="numeric" value="${esc(x.pulso)}"></div>
+    <div><label for="ed-sis">Sistólica</label><input id="ed-sis" inputmode="numeric" value="${esc(x.presion_sis)}"></div><div><label for="ed-dia">Diastólica</label><input id="ed-dia" inputmode="numeric" value="${esc(x.presion_dia)}"></div></div>
+    <label for="ed-act">Actividad</label><input id="ed-act" value="${esc(x.actividad)}" placeholder="spinning, caminata…">
+    <div class="g2"><div><label for="ed-min">Minutos</label><input id="ed-min" inputmode="numeric" value="${esc(x.actividad_min)}"></div><div><label for="ed-int">Intensidad</label>${sel("ed-int",[["","—"],["suave","Suave"],["moderada","Moderada"],["intensa","Intensa"]],x.intensidad||"")}</div></div>
+    <label for="ed-not">Notas</label><input id="ed-not" value="${esc(x.notas)}">`;
+  else h+=`<label for="ed-com">Comida</label>${sel("ed-com",Object.keys(NOMC).map(k=>[k,NOMC[k]]),x.comida)}
+    <label for="ed-desc">Descripción</label><textarea id="ed-desc">${esc(x.descripcion)}</textarea>
+    <div class="g2"><div><label for="ed-kc">Calorías</label><input id="ed-kc" inputmode="numeric" value="${esc(x.kcal_est)}"></div><div><label for="ed-pr">Proteína (g)</label><input id="ed-pr" inputmode="decimal" value="${esc(x.proteina_g_est)}"></div></div>
+    <label for="ed-rec">¿Siguió el recetario?</label>${sel("ed-rec",[["","—"],["si","Sí"],["parcial","Parcialmente"],["no","No"]],x.siguio_recetario||"")}`;
+  h+=`<button class="save" id="ed-ok" type="button">Guardar cambios</button><button class="save sec" id="ed-no" type="button">Cancelar</button><button class="save sec" id="ed-del" type="button" style="color:var(--crit)">Eliminar este registro</button><div class="msg" id="ed-m"></div>`;
+  $("edit-body").innerHTML=h;$("edit").style.display="block";
+  const cierra=()=>{$("edit").style.display="none"};$("ed-no").onclick=cierra;
+  const v=i=>$(i).value.replace(",",".").trim();
+  const envia=async o=>{try{await post(Object.assign({accion:"salud_editar",tipo:tipo,id:id},o));sonidoGuardado();cache=null;cierra();historial()}catch(er){msg("ed-m",er.message,"err")}};
+  $("ed-del").onclick=()=>{if(confirm("¿Eliminar este registro? Queda anotado en la hoja Auditoría."))envia({borrar:true})};
+  $("ed-ok").onclick=()=>{msg("ed-m","Guardando...");
+    if(tipo==="medida"){const a=v("ed-act").toLowerCase(),m=Number(v("ed-min")),it=$("ed-int").value;
+      envia({fecha:$("ed-fecha").value,hora:$("ed-hora").value,peso_kg:v("ed-peso"),pulso:v("ed-pul"),presion_sis:v("ed-sis"),presion_dia:v("ed-dia"),actividad:a,actividad_min:a?v("ed-min"):"",intensidad:it,
+        kcal_gasto:a&&m>0?kcalEj(a,it||"moderada",m,kgRef()):"",energia_1a5:x.energia_1a5,cintura_cm:x.cintura_cm,pasos:x.pasos,notas:v("ed-not")})}
+    else envia({fecha:$("ed-fecha").value,comida:$("ed-com").value,descripcion:$("ed-desc").value,kcal_est:v("ed-kc"),proteina_g_est:v("ed-pr"),siguio_recetario:$("ed-rec").value})}}
 /* ===== Semana ===== */
 async function semana(){
   if(!cache)$("kpi").innerHTML=LDR;
@@ -535,7 +604,7 @@ async function semana(){
 /* ===== Navegación y configuración ===== */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.t===p));
   document.querySelectorAll(".pg").forEach(x=>x.classList.toggle("on",x.id==="pg-"+p));
-  if(p==="reg"){pintaTodo();prefijaHoras()}if(p==="ana")analisis();if(p==="sem")semana()}
+  if(p==="reg"){pintaTodo();prefijaHoras()}if(p==="ana")analisis();if(p==="sem")semana();if(p==="his")historial()}
 document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-t]");if(b)irA(b.dataset.t)};
 $("gcfg").onclick=async()=>{
   const url=$("url").value.trim(),llave=$("llave").value.trim(),p1=$("pin1").value,p2=$("pin2").value,m=$("mcfg");m.className="msg err";
