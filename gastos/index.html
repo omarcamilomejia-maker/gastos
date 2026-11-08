@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-07.1">
+<meta name="app-version" content="2026-11-07.2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -185,7 +185,7 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
     <div><label for="hact">Activo</label><select id="hact"></select></div><div><label for="hcat">Categoría</label><select id="hcat"></select></div></div>
     <label class="lbl" style="margin-top:8px;justify-content:flex-start;gap:8px"><input type="checkbox" id="han" style="width:auto"> Incluir anulados</label></div>
   <div class="card"><h2>Resumen del filtro</h2><div class="kpi" id="hkpi"></div><p class="hint" id="hnota" style="margin-top:8px"></p>
-    <div style="display:flex;gap:6px;align-items:center"><label for="humb" style="font-size:.72rem;color:var(--ink2);white-space:nowrap">Único grande desde $</label><input id="humb" inputmode="numeric" style="padding:.35rem .5rem"></div></div>
+    <div style="display:flex;gap:6px;align-items:center"><label for="humb" style="font-size:.72rem;color:var(--ink2);white-space:nowrap">Único grande desde $</label><input id="humb" inputmode="numeric" style="padding:.35rem .5rem"></div><button class="save sec" id="hcsv" type="button" style="margin-top:8px">Exportar CSV de este filtro</button></div>
   <div class="card" id="hanio" style="display:none"><h2>Por año (lo buscado, todo el historial)</h2><div id="hanioT"></div></div>
   <div class="list" id="hl2"></div><button class="save sec" id="hmas" type="button" style="display:none">Ver más</button><div class="msg" id="hmsg2"></div>
 </section>
@@ -194,6 +194,7 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
   <div class="card"><h2>Próximos vencimientos</h2><div class="list" id="vlist"></div><button class="save sec" id="vnew" type="button" style="margin-top:8px">＋ Agregar vencimiento</button></div>
   <div class="card"><h2>Mis activos</h2><div class="list" id="alist"></div><button class="save sec" id="anew" type="button" style="margin-top:8px">＋ Agregar activo</button></div>
   <div class="card"><h2>Costo por activo</h2><div class="fil"><div><label for="ra">Activo</label><select id="ra"></select></div><div><label for="ry">Año</label><select id="ry"></select></div></div><div id="rbody" style="margin-top:8px"></div></div>
+  <div class="card"><h2>Reporte por etiqueta</h2><label class="lbl" for="rt" style="margin-bottom:4px">Etiqueta</label><select id="rt"></select><div id="rtbody" style="margin-top:8px"></div></div>
   <div class="card"><h2>Recordatorios</h2><label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="acorreo" style="width:auto"> Recordatorios por correo (apagado por defecto)</label><p class="hint" style="margin-top:6px">Los avisos dentro de la app siempre funcionan. El correo necesita autorizar un permiso una sola vez en el script; se activa cuando usted lo decida.</p><div class="msg" id="amsg2"></div></div>
 </section>
 <div id="edit"><div id="edit-body"></div></div>
@@ -253,7 +254,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-07.1";
+const APP_V="2026-11-07.2";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -279,7 +280,7 @@ const rd=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const rm=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const ERR={llave:"Llave incorrecta",limite:"Demasiadas peticiones, espere un momento",valor:"Valor inválido",fecha:"Fecha inválida",medio:"Medio de pago inválido",
-  categoria:"Categoría no válida (si es «Otros», elíjala de la lista completa)",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",foto_repetida:"Esa foto ya está guardada",ocupado:"Ocupado, reintente",activo:"Activo no válido",nombre:"Nombre no válido",duplicado:"Ya existe uno con ese nombre",no_existe:"Ese registro ya no existe",nada:"No hay cambios para deshacer",tipo:"Tipo inválido",id:"Registro inválido"};
+  categoria:"Categoría no válida (si es «Otros», elíjala de la lista completa)",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",foto_repetida:"Esa foto ya está guardada",km:"Kilometraje inválido",ocupado:"Ocupado, reintente",activo:"Activo no válido",nombre:"Nombre no válido",duplicado:"Ya existe uno con ese nombre",no_existe:"Ese registro ya no existe",nada:"No hay cambios para deshacer",tipo:"Tipo inválido",id:"Registro inválido"};
 const fmt=n=>"$ "+Math.round(n).toLocaleString("es-CO");
 const cmp=n=>{const a=Math.abs(n);return (n<0?"-":"")+(a>=1e6?(a/1e6).toFixed(a>=1e7?0:1).replace(".",",")+" M":a>=1e3?Math.round(a/1e3)+" mil":Math.round(a))};
 const pad=n=>String(n).padStart(2,"0");
@@ -576,10 +577,10 @@ function tarjetasExtra(G,a,b,grp,inR){
 
 
 /* ---- Activos, etiquetas, historial, vencimientos ---- */
-let ACT={activos:[],vencimientos:[],etiquetas:[],tipos:[],aviso:false},actSel="",pagoVenc=null,HIS=null,hisAt=0,hLim=80,UMB=Number(rd("g_umbral"))||1000000;
+let ACT={activos:[],vencimientos:[],etiquetas:[],tipos:[],aviso:false,mant:[],tareas:[],docs:[]},actSel="",pagoVenc=null,HIS=null,hisAt=0,hLim=80,UMB=Number(rd("g_umbral"))||1000000;
 async function cargaActivos(){
-  try{const r=await get("activos");ACT={activos:r.activos,vencimientos:r.vencimientos,etiquetas:r.etiquetas,tipos:r.tipos_vencimiento,aviso:r.aviso_correo};wr("g_act",JSON.stringify(ACT))}
-  catch(e){try{const c=JSON.parse(rd("g_act")||"null");if(c)ACT=c}catch(x){}}
+  try{const r=await get("activos");ACT={activos:r.activos,vencimientos:r.vencimientos,etiquetas:r.etiquetas,tipos:r.tipos_vencimiento,aviso:r.aviso_correo,mant:r.mantenimientos||[],tareas:r.tareas||[],docs:r.docs||[]};wr("g_act",JSON.stringify(ACT))}
+  catch(e){try{const c=JSON.parse(rd("g_act")||"null");if(c)ACT=Object.assign(ACT,c)}catch(x){}}
   pintaActivosReg()}
 const actNombre=id=>{const a=ACT.activos.find(x=>x.id===id);return a?a.nombre:""};
 const norm=s=>String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -667,12 +668,12 @@ async function activos(){
   $("vlist").innerHTML=LDR;
   await cargaActivos();
   try{await cargaHis()}catch(e){}
-  pintaVen();pintaAct();pintaRep();$("acorreo").checked=!!ACT.aviso}
+  pintaVen();pintaAct();pintaRep();pintaTag();$("acorreo").checked=!!ACT.aviso}
 function pintaVen(){const l=ACT.vencimientos.filter(x=>x.estado==="vigente").sort((a,b)=>a.fecha<b.fecha?-1:1);
   $("vlist").innerHTML=l.map(x=>{const d=vDias(x),est=d<0?`<span class="pill" style="background:#f6d4d1;color:var(--crit)">vencido hace ${-d} d</span>`:d<=x.dias?`<span class="pill">en ${d} d</span>`:`<span class="pill" style="background:var(--acc-t);color:var(--acc)">en ${d} d</span>`;
     return `<div class="item"><div><span style="font-weight:650">${esc(x.tipo)}</span> · ${esc(actNombre(x.activo_id))} ${est}<br><small>${x.fecha}${x.entidad?" · "+esc(x.entidad):""}${x.poliza?" · póliza "+esc(x.poliza):""}${x.valor!==""?" · aprox. "+fmt(x.valor):""}${x.avisar?" · 🔔":""}</small></div><div style="text-align:right"><button type="button" class="mini" data-vp="${esc(x.id)}">Pagar</button> <button type="button" class="mini" data-ve="${esc(x.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay vencimientos. Agregue el SOAT, el seguro o el impuesto de cada activo.</div>"}
 function pintaAct(){const y=String(new Date().getFullYear()),G=(HIS||[]).filter(m=>m.t==="G"&&m.e!=="anulado"&&m.act);
-  $("alist").innerHTML=ACT.activos.map(a=>{const g=G.filter(m=>m.act===a.id);return `<div class="item"><div><span style="font-weight:650">${esc(a.nombre)}</span>${a.activo?"":" <span class='pill'>inactivo</span>"}<br><small>${esc(a.tipo)}${a.identificador?" · "+esc(a.identificador):""}</small></div><div style="text-align:right"><b>${fmt(sum(g.filter(m=>m.f.slice(0,4)===y)))}</b><br><small>este año · total ${cmp(sum(g))}</small><br><button type="button" class="mini" data-ae="${esc(a.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay activos. Agregue sus vehículos, predios u otros.</div>"}
+  $("alist").innerHTML=ACT.activos.map(a=>{const g=G.filter(m=>m.act===a.id);return `<div class="item"><div><span style="font-weight:650">${esc(a.nombre)}</span>${a.activo?"":" <span class='pill'>inactivo</span>"}<br><small>${esc(a.tipo)}${a.identificador?" · "+esc(a.identificador):""}</small></div><div style="text-align:right"><b>${fmt(sum(g.filter(m=>m.f.slice(0,4)===y)))}</b><br><small>este año · total ${cmp(sum(g))}</small><br><button type="button" class="mini" data-ao="${esc(a.id)}">Abrir</button> <button type="button" class="mini" data-ae="${esc(a.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay activos. Agregue sus vehículos, predios u otros.</div>"}
 function pintaRep(){
   const ra=$("ra"),ry=$("ry"),pa=ra.value,py=ry.value;
   ra.innerHTML='<option value="">Todos los activos</option>'+ACT.activos.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("");ra.value=pa;
@@ -687,10 +688,11 @@ function pintaRep(){
   $("rbody").innerHTML=`<div class="kpi">${kp("Total histórico",fmt(sum(base)),base.length+" gastos")}${kp("Total "+y,fmt(sum(del)),"Promedio mensual "+cmp(sum(del)/meses))}</div>
     <h2 style="margin-top:12px">Año contra año</h2><table class="tbl"><tr><th>Año</th><th>Total</th><th>Var.</th></tr>${yl.map((k,i)=>`<tr><td>${k}</td><td>${fmt(porY[k])}</td><td>${i?deltaTxt(porY[k],porY[yl[i-1]],true):"—"}</td></tr>`).join("")}</table>
     <h2 style="margin-top:12px">Por mes en ${y}</h2>${barsH(mm,0)}
-    <h2 style="margin-top:12px">Por categoría en ${y}</h2>${barsH(cats,sum(del))}`}
+    <h2 style="margin-top:12px">Por categoría en ${y}</h2>${barsH(cats,sum(del))}<button class="save sec" id="rcsv" type="button" style="margin-top:10px">Exportar CSV de este reporte</button>`;
+  $("rcsv").onclick=()=>csv("activos-"+iso(new Date())+".csv",[CSV_ENC].concat(base.slice().sort(porFecha).map(movFila)))}
 $("ra").onchange=$("ry").onchange=()=>pintaRep();
 $("vlist").onclick=e=>{const p=e.target.closest("[data-vp]"),d=e.target.closest("[data-ve]");if(p)pagaVen(p.dataset.vp);if(d)abreEdVen(d.dataset.ve)};
-$("alist").onclick=e=>{const d=e.target.closest("[data-ae]");if(d)abreEdAct(d.dataset.ae)};
+$("alist").onclick=e=>{const d=e.target.closest("[data-ae]"),o=e.target.closest("[data-ao]");if(d)abreEdAct(d.dataset.ae);if(o)abreActivo(o.dataset.ao)};
 $("anew").onclick=()=>abreEdAct("");$("vnew").onclick=()=>abreEdVen("");
 function abreEdAct(id){const a=ACT.activos.find(x=>x.id===id)||{id:"",nombre:"",tipo:"vehiculo",identificador:"",notas:"",activo:true};
   abreEd(`<h2 style="margin-top:0">${id?"Editar activo":"Nuevo activo"}</h2>
@@ -735,6 +737,103 @@ async function cierraPago(x,movId){
 $("acorreo").onchange=async e=>{const box=e.target;try{await post({accion:"aviso_config",correo:box.checked});ACT.aviso=box.checked;$("amsg2").textContent=box.checked?"Activado. Recuerde autorizar el permiso de correo en el script para que lleguen los avisos.":"Apagado.";$("amsg2").className="msg ok"}catch(er){box.checked=!box.checked;$("amsg2").textContent=er.message;$("amsg2").className="msg err"}};
 
 
+/* ---- entrega 2: CSV, reporte por etiqueta, detalle de activo (documentos, mantenimiento, tareas) ---- */
+function csv(nombre,filas){const q=x=>{const s=String(x==null?"":x);return /[";\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const txt="﻿"+filas.map(r=>r.map(q).join(";")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"}));a.download=nombre;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+const CSV_ENC=["fecha","tipo","grupo","categoria","comercio","medio","descripcion","valor","estado","activo","etiquetas"];
+const movFila=m=>[m.f,m.t==="I"?"Ingreso":"Gasto",m.g,m.c,m.com,m.med,m.nota,m.v,m.e,actNombre(m.act),m.tg];
+const porFecha=(a,b)=>a.f<b.f?-1:a.f>b.f?1:0;
+$("hcsv").onclick=()=>{if(HIS)csv("historial-"+iso(new Date())+".csv",[CSV_ENC].concat(filtraHis(true).sort(porFecha).map(movFila)))};
+
+function pintaTag(){
+  const sl=$("rt"),p=sl.value,c={};
+  (HIS||[]).forEach(m=>{if(m.e==="anulado"||m.t!=="G")return;m.tg.split(", ").forEach(t=>{if(t)c[t]=(c[t]||0)+1})});
+  const ts=Object.keys(c).sort();
+  sl.innerHTML='<option value="">Elija una etiqueta…</option>'+ts.map(t=>`<option value="${esc(t)}">${esc(t)} (${c[t]})</option>`).join("");sl.value=ts.indexOf(p)>=0?p:"";
+  if(!sl.value){$("rtbody").innerHTML='<div class="hint">Elija una etiqueta para ver el total y el promedio por año.</div>';return}
+  const L=HIS.filter(m=>m.e!=="anulado"&&m.t==="G"&&m.tg.split(", ").indexOf(sl.value)>=0),por={};
+  L.forEach(m=>{const y=m.f.slice(0,4);(por[y]=por[y]||[]).push(m.v)});
+  const ys=Object.keys(por).sort();let prev=0;
+  $("rtbody").innerHTML=`<table class="tbl"><tr><th>Año</th><th>Veces</th><th>Total</th><th>Promedio</th><th>Var.</th></tr>`+ys.map(y=>{const a=por[y],s=a.reduce((x,z)=>x+z,0),p2=s/a.length,h=`<tr><td>${y}</td><td>${a.length}</td><td>${fmt(s)}</td><td>${fmt(p2)}</td><td>${prev?deltaTxt(p2,prev,true):"—"}</td></tr>`;prev=p2;return h}).join("")+`</table>
+    <h2 style="margin-top:12px">Detalle</h2><div class="list">`+L.slice().sort((a,b)=>-porFecha(a,b)).slice(0,60).map(m=>`<div class="item"><div>${esc(m.nota||m.c)}<br><small>${m.f}${m.com?" · "+esc(m.com):""}</small></div><b>${fmt(m.v)}</b></div>`).join("")+`</div>
+    <button class="save sec" id="rtcsv" type="button" style="margin-top:8px">Exportar CSV</button>`;
+  $("rtcsv").onclick=()=>csv("etiqueta-"+norm(sl.value).replace(/\W+/g,"-")+".csv",[CSV_ENC].concat(L.slice().sort(porFecha).map(movFila)))}
+$("rt").onchange=pintaTag;
+
+const NOMD={poliza:"Póliza",recibo_impuesto:"Recibo de impuesto",factura:"Factura",tarjeta_propiedad:"Tarjeta de propiedad",escritura:"Escritura",otro:"Otro"};
+const TIPOS_MANT=["Cambio de aceite","Llantas","Frenos","Alineación y balanceo","Revisión técnico-mecánica","Lavado","Reparación","Mantenimiento general","Lectura de kilometraje"];
+const hoyMs=()=>new Date(iso(new Date())+"T12:00:00").getTime();
+function kmActual(id){const k=ACT.mant.filter(x=>x.activo_id===id&&x.km!=="").map(x=>x.km);return k.length?Math.max.apply(null,k):null}
+function estTarea(t,kmAct){const txt=[];let niv=0;
+  if(t.cada_dias>0&&t.ultima_fecha){const d=Math.round((new Date(t.ultima_fecha+"T12:00:00").getTime()+t.cada_dias*864e5-hoyMs())/864e5);txt.push(d<0?"vencida hace "+(-d)+" d":d===0?"hoy":"en "+d+" d");if(d<0)niv=2;else if(d<=15)niv=Math.max(niv,1)}
+  if(t.cada_km>0&&t.ultimo_km!==""&&kmAct!==null){const f=t.ultimo_km+t.cada_km-kmAct;txt.push(f<0?"pasada por "+(-f)+" km":"faltan "+f.toLocaleString("es-CO")+" km");if(f<0)niv=2;else if(f<=500)niv=Math.max(niv,1)}
+  if(!txt.length)txt.push("sin registro previo: marque «Hecho» al realizarla");
+  return {txt:txt.join(" · "),niv:niv}}
+const volverA=id=>async()=>{await cargaActivos();abreActivo(id)};
+function abreActivo(id){
+  const a=ACT.activos.find(x=>x.id===id);if(!a)return;
+  const G=(HIS||[]).filter(m=>m.act===id&&m.t==="G"&&m.e!=="anulado"),veh=a.tipo==="vehiculo",yy=String(new Date().getFullYear());
+  const mant=ACT.mant.filter(x=>x.activo_id===id).sort((p,q)=>p.fecha<q.fecha?1:p.fecha>q.fecha?-1:0),tar=ACT.tareas.filter(x=>x.activo_id===id&&x.estado==="activa"),docs=ACT.docs.filter(x=>x.activo_id===id),kmA=kmActual(id);
+  let ckm="Registre al menos dos lecturas de kilometraje para calcular el costo por km.";
+  if(veh){const lect=mant.filter(x=>x.km!=="").slice().sort((p,q)=>p.fecha<q.fecha?-1:1);
+    if(lect.length>=2){const p0=lect[0],p1=lect[lect.length-1],dk=p1.km-p0.km;if(dk>0){const gs=sum(G.filter(m=>m.f>=p0.fecha&&m.f<=p1.fecha));ckm=fmt(gs/dk)+" por km · "+fmt(gs)+" en "+dk.toLocaleString("es-CO")+" km ("+p0.fecha+" a "+p1.fecha+")"}}}
+  abreEd(`<h2 style="margin-top:0">${esc(a.nombre)}</h2><div class="kpi">${kp("Este año",fmt(sum(G.filter(m=>m.f.slice(0,4)===yy))),"Total "+fmt(sum(G)))}${veh?kp("Kilometraje",kmA===null?"—":kmA.toLocaleString("es-CO")+" km","último registrado"):kp("Gastos",G.length,"asignados")}</div>
+    ${veh?`<p class="hint" style="margin-top:8px">Costo por km: ${ckm}</p>`:""}
+    <h2 style="margin-top:14px">Tareas recurrentes</h2><div class="list">${tar.map(t=>{const e=estTarea(t,kmA);return `<div class="item"><div><span style="font-weight:650">${esc(t.nombre)}</span> <span class="pill" style="${e.niv===2?"background:#f6d4d1;color:var(--crit)":e.niv===0?"background:var(--acc-t);color:var(--acc)":""}">${esc(e.txt)}</span><br><small>${t.cada_dias>0?"cada "+t.cada_dias+" días":""}${t.cada_dias>0&&t.cada_km>0?" o ":""}${t.cada_km>0?"cada "+t.cada_km.toLocaleString("es-CO")+" km":""}${t.avisar?" · 🔔":""}</small></div><div style="text-align:right"><button type="button" class="mini" data-hecho="${esc(t.id)}">Hecho</button> <button type="button" class="mini" data-tedit="${esc(t.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Sin tareas. Ej: cambio de aceite cada 6 meses o 5.000 km.</div>"}</div>
+    <button class="save sec" type="button" data-tnew="1" style="margin-top:6px">＋ Agregar tarea recurrente</button>
+    <h2 style="margin-top:14px">Mantenimiento${veh?" y kilometraje":""}</h2><div class="list">${mant.slice(0,12).map(x=>`<div class="item"><div>${esc(x.tipo)}${x.mov_id?" 📎":""}<br><small>${x.fecha}${x.km!==""?" · "+x.km.toLocaleString("es-CO")+" km":""}${x.taller?" · "+esc(x.taller):""}</small>${x.notas?"<br><small>"+esc(x.notas)+"</small>":""}</div><div style="text-align:right"><button type="button" class="mini" data-medit="${esc(x.id)}">Editar</button></div></div>`).join("")||"<div class='item'>Sin registros.</div>"}</div>
+    <button class="save sec" type="button" data-mnew="1" style="margin-top:6px">＋ Registrar mantenimiento${veh?" o kilometraje":""}</button>
+    <h2 style="margin-top:14px">Documentos y soportes</h2><div class="list">${docs.map(d=>`<div class="item"><div>${esc(NOMD[d.tipo]||d.tipo)}<br><small>${esc(d.creado)}</small></div><div style="text-align:right"><a href="https://drive.google.com/file/d/${esc(d.drive_id)}/view" target="_blank" rel="noopener">Abrir</a></div></div>`).join("")||"<div class='item'>Sin documentos.</div>"}</div>
+    <button class="save sec" type="button" data-dnew="1" style="margin-top:6px">＋ Agregar foto (póliza, recibo, factura)</button>
+    <button class="save sec" id="ed-x" type="button" style="margin-top:14px">Cerrar</button>`);
+  $("ed-x").onclick=cierraEd;
+  $("edit-body").onclick=e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
+    if(d.mnew)formMant(id,null,null);else if(d.medit)formMant(id,ACT.mant.find(x=>x.id===d.medit),null);
+    else if(d.tnew)formTarea(id,null);else if(d.tedit)formTarea(id,ACT.tareas.find(x=>x.id===d.tedit));
+    else if(d.hecho)formMant(id,null,ACT.tareas.find(x=>x.id===d.hecho));else if(d.dnew)formDoc(id)}}
+function formDoc(id){let b64="";
+  abreEd(`<h2 style="margin-top:0">Agregar documento</h2><label class="lbl" for="fd-t">Tipo</label><select id="fd-t">${Object.keys(NOMD).map(k=>opt(k,NOMD[k],false)).join("")}</select>
+    <div style="display:flex;gap:8px;margin-top:10px"><label class="chip" for="fd-c" style="flex:1;display:grid;place-items:center">📷 Cámara</label><label class="chip" for="fd-g" style="flex:1;display:grid;place-items:center">🖼 Galería</label></div>
+    <input id="fd-c" type="file" accept="image/*" capture="environment" style="display:none"><input id="fd-g" type="file" accept="image/*" style="display:none">
+    <img id="fd-p" alt="Vista previa" style="display:none;max-width:100%;border-radius:.7rem;margin-top:8px">
+    <button class="save" id="ed-ok" type="button" style="margin-top:12px">Guardar</button><button class="save sec" id="ed-x" type="button" style="margin-top:6px">Volver</button><div class="msg" id="ed-m"></div>`);
+  const lee=async e=>{const f=e.target.files[0];if(!f)return;try{b64=await comprimir(f);$("fd-p").src="data:image/jpeg;base64,"+b64;$("fd-p").style.display="block";edMsg("Foto lista",true)}catch(x){b64="";edMsg("No se pudo leer la foto")}};
+  $("fd-c").onchange=lee;$("fd-g").onchange=lee;$("ed-x").onclick=volverA(id);
+  $("ed-ok").onclick=async()=>{if(!b64)return edMsg("Elija una foto");edMsg("Guardando...",true);
+    try{await post({accion:"activo_doc",activo_id:id,tipo:$("fd-t").value,foto_b64:b64});sonidoGuardado();await volverA(id)()}catch(er){edMsg(er.message)}}}
+function formMant(id,m,tarea){
+  const a=ACT.activos.find(x=>x.id===id),veh=a&&a.tipo==="vehiculo",x=m||{id:"",fecha:iso(new Date()),km:tarea&&kmActual(id)!==null?kmActual(id):"",tipo:tarea?tarea.nombre:"",taller:"",notas:"",mov_id:""};
+  abreEd(`<h2 style="margin-top:0">${m?"Editar registro":tarea?"Tarea realizada":"Registrar mantenimiento"}</h2>
+    <label class="lbl" for="fm-t">Qué se hizo</label><input id="fm-t" list="fm-l" maxlength="40" value="${esc(x.tipo)}" placeholder="Cambio de aceite, Lectura de kilometraje…"><datalist id="fm-l">${TIPOS_MANT.map(t=>`<option value="${esc(t)}">`).join("")}</datalist>
+    <label class="lbl" for="fm-f">Fecha</label><input id="fm-f" type="date" value="${x.fecha}">
+    ${veh?`<label class="lbl" for="fm-k">Kilometraje</label><input id="fm-k" inputmode="numeric" value="${x.km}" placeholder="Ej: 45200">`:""}
+    <label class="lbl" for="fm-w">Taller o lugar (opcional)</label><input id="fm-w" maxlength="60" value="${esc(x.taller)}">
+    <label class="lbl" for="fm-n">Notas (opcional)</label><input id="fm-n" maxlength="140" value="${esc(x.notas)}">
+    <p class="hint" style="margin-top:6px">El valor pagado se registra como gasto normal, eligiendo este activo; así el costo por km y los reportes lo incluyen.</p>
+    <button class="save" id="ed-ok" type="button" style="margin-top:8px">Guardar</button>${m?'<button class="save sec" id="ed-del" type="button" style="margin-top:6px;color:var(--crit)">Eliminar registro</button>':""}<button class="save sec" id="ed-x" type="button" style="margin-top:6px">Volver</button><div class="msg" id="ed-m"></div>`);
+  $("ed-x").onclick=volverA(id);
+  $("ed-ok").onclick=async()=>{if(!$("fm-t").value.trim())return edMsg("Escriba qué se hizo");edMsg("Guardando...",true);
+    try{await post({accion:"mantenimiento",id:m?m.id:undefined,activo_id:id,fecha:$("fm-f").value,km:veh?$("fm-k").value.replace(/\D/g,""):"",tipo:$("fm-t").value,taller:$("fm-w").value,notas:$("fm-n").value,mov_id:x.mov_id||undefined,tarea_id:tarea?tarea.id:undefined});sonidoGuardado();await volverA(id)()}catch(er){edMsg(er.message)}};
+  if($("ed-del"))$("ed-del").onclick=async()=>{if(!confirm("¿Eliminar este registro? Queda anotado en Auditoría."))return;try{await post({accion:"mantenimiento",id:m.id,activo_id:id,borrar:true});await volverA(id)()}catch(er){edMsg(er.message)}}}
+function formTarea(id,t){
+  const a=ACT.activos.find(x=>x.id===id),veh=a&&a.tipo==="vehiculo",x=t||{id:"",nombre:"",cada_dias:"",cada_km:"",ultima_fecha:"",ultimo_km:"",avisar:false,estado:"activa"};
+  abreEd(`<h2 style="margin-top:0">${t?"Editar tarea":"Nueva tarea recurrente"}</h2>
+    <label class="lbl" for="ft-n">Nombre</label><input id="ft-n" maxlength="60" value="${esc(x.nombre)}" placeholder="Ej: Cambio de aceite, Fumigación">
+    <label class="lbl" for="ft-d">Se repite cada (días)</label><input id="ft-d" inputmode="numeric" value="${x.cada_dias}" placeholder="Ej: 180">
+    ${veh?`<label class="lbl" for="ft-k">…o cada (km)</label><input id="ft-k" inputmode="numeric" value="${x.cada_km}" placeholder="Ej: 5000">`:""}
+    <label class="lbl" for="ft-f">Última vez (fecha, opcional)</label><input id="ft-f" type="date" value="${x.ultima_fecha}">
+    ${veh?`<label class="lbl" for="ft-u">Última vez (km, opcional)</label><input id="ft-u" inputmode="numeric" value="${x.ultimo_km}">`:""}
+    <label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="ft-a" style="width:auto"${x.avisar?" checked":""}> Recordarme por correo cuando esté activado 🔔</label>
+    ${t?`<label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="ft-z" style="width:auto"> Archivar esta tarea</label>`:""}
+    <button class="save" id="ed-ok" type="button" style="margin-top:12px">Guardar</button><button class="save sec" id="ed-x" type="button" style="margin-top:6px">Volver</button><div class="msg" id="ed-m"></div>`);
+  $("ed-x").onclick=volverA(id);
+  $("ed-ok").onclick=async()=>{if(!$("ft-n").value.trim())return edMsg("Escriba el nombre");const dd=Number($("ft-d").value.replace(/\D/g,""))||0,kk=veh?Number($("ft-k").value.replace(/\D/g,""))||0:0;if(!(dd>0)&&!(kk>0))return edMsg("Indique cada cuántos días o km se repite");
+    edMsg("Guardando...",true);
+    try{await post({accion:"tarea",id:t?t.id:undefined,activo_id:id,nombre:$("ft-n").value,cada_dias:dd||"",cada_km:kk||"",ultima_fecha:$("ft-f").value||undefined,ultimo_km:veh?$("ft-u").value.replace(/\D/g,""):"",avisar:$("ft-a").checked,estado:$("ft-z")&&$("ft-z").checked?"archivada":"activa"});sonidoGuardado();await volverA(id)()}catch(er){edMsg(er.message)}}}
+
+
 /* ---- navegación y configuración ---- */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
   document.querySelectorAll(".pg").forEach(x=>x.classList.toggle("on",x.id==="pg-"+p));
@@ -759,6 +858,7 @@ $("url").value=rd(PFX+"_url");
 const sndLbl=()=>{$("snd").textContent="Sonido de bienvenida: "+(rd(PFX+"_snd")==="0"?"desactivado":"activado")};
 $("snd").onclick=()=>{wr(PFX+"_snd",rd(PFX+"_snd")==="0"?"1":"0");sndLbl();if(rd(PFX+"_snd")!=="0")sonidoOk()};sndLbl();
 
+try{localStorage.setItem("ocarisa_ult",location.pathname)}catch(e){}
 function iniciaApp(){pintaBtns();cargaCatalogo();cargaActivos();vaciarCola().catch(()=>{});irA("reg")}
 (function arranque(){
   pintaBtns();
