@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-04.9">
+<meta name="app-version" content="2026-11-07.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -92,9 +92,14 @@ input,select,textarea{width:100%;font:inherit;font-size:16px;padding:.55rem .7re
 .card{background:var(--surface);border:1px solid var(--rule);border-radius:1rem;padding:.85rem}
 .card h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);margin:0 0 .5rem}
 .card .hint{font-size:.78rem;color:var(--ink2);margin:-.3rem 0 .5rem}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
-.tabs button{border:0;background:none;color:var(--ink2);font-size:.7rem;padding:.3rem;cursor:pointer}.tabs button b{display:block;font-size:1.15rem;font-weight:500}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(6,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
+.tabs button{border:0;background:none;color:var(--ink2);font-size:.62rem;padding:.3rem .1rem;cursor:pointer}.tabs button b{display:block;font-size:1.15rem;font-weight:500}
 .tabs .on{color:var(--acc);font-weight:700}
+.mini{border:1px solid var(--rule);background:var(--key);color:var(--ink);border-radius:.6rem;padding:.25rem .6rem;font-size:.75rem;margin-top:4px;cursor:pointer}
+#edit{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:20;overflow:auto;padding:16px}
+#edit>div{background:var(--surface);border-radius:1rem;padding:1rem;max-width:520px;margin:0 auto}
+#edit label.lbl{margin-top:8px}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}.tbl th,.tbl td{text-align:left;padding:.3rem .2rem;border-bottom:1px solid var(--rule)}.tbl td:last-child,.tbl th:last-child{text-align:right}
 /* análisis */
 .fil{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fil label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);display:block;margin-bottom:2px}
@@ -158,6 +163,9 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
   <input id="com" list="coms" placeholder="Opcional: Sandra Plaza, Jumbo..." autocomplete="off"><datalist id="coms"></datalist>
   <div class="lbl">Descripción (qué compró y para qué)</div>
   <input id="desc" maxlength="140" placeholder="Opcional: torta del cumpleaños de Laura" autocomplete="off">
+  <div id="actbox" style="display:none"><div class="lbl">Activo (opcional)</div><div class="chips" id="actchips"></div></div>
+  <div class="lbl">Etiquetas (opcional, separadas por coma)</div>
+  <input id="tags" list="tagl" maxlength="80" placeholder="Ej: vacunas, hijos" autocomplete="off"><datalist id="tagl"></datalist>
   <div class="lbl">Factura o soporte</div>
   <div class="foto"><label class="chip" for="foto">📷 Cámara</label><input id="foto" type="file" accept="image/*" capture="environment"><label class="chip" for="fotoG">🖼 Galería</label><input id="fotoG" type="file" accept="image/*"><img id="prev" alt="Vista previa">
     <div class="pay" id="tdoc" style="flex:1;display:none"></div></div>
@@ -166,9 +174,29 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
 
 <section class="pg" id="pg-hoy">
   <div class="hero"><small id="hfecha"></small><div class="big" id="htot">$ 0</div><small id="hsub"></small></div>
+  <div id="hven"></div>
   <div class="list" id="hlist"></div>
   <div class="msg" id="hmsg"></div>
 </section>
+
+<section class="pg" id="pg-his">
+  <div class="card"><input id="hq" type="search" placeholder="Buscar: vacunas, Jumbo, SOAT…" autocomplete="off" aria-label="Buscar">
+    <div class="fil" style="margin-top:8px"><div><label for="hper">Periodo</label><select id="hper"></select></div><div><label for="ht">Tipo</label><select id="ht"><option value="">Todos</option><option value="G">Gastos</option><option value="I">Ingresos</option></select></div>
+    <div><label for="hact">Activo</label><select id="hact"></select></div><div><label for="hcat">Categoría</label><select id="hcat"></select></div></div>
+    <label class="lbl" style="margin-top:8px;justify-content:flex-start;gap:8px"><input type="checkbox" id="han" style="width:auto"> Incluir anulados</label></div>
+  <div class="card"><h2>Resumen del filtro</h2><div class="kpi" id="hkpi"></div><p class="hint" id="hnota" style="margin-top:8px"></p>
+    <div style="display:flex;gap:6px;align-items:center"><label for="humb" style="font-size:.72rem;color:var(--ink2);white-space:nowrap">Único grande desde $</label><input id="humb" inputmode="numeric" style="padding:.35rem .5rem"></div></div>
+  <div class="card" id="hanio" style="display:none"><h2>Por año (lo buscado, todo el historial)</h2><div id="hanioT"></div></div>
+  <div class="list" id="hl2"></div><button class="save sec" id="hmas" type="button" style="display:none">Ver más</button><div class="msg" id="hmsg2"></div>
+</section>
+
+<section class="pg" id="pg-act">
+  <div class="card"><h2>Próximos vencimientos</h2><div class="list" id="vlist"></div><button class="save sec" id="vnew" type="button" style="margin-top:8px">＋ Agregar vencimiento</button></div>
+  <div class="card"><h2>Mis activos</h2><div class="list" id="alist"></div><button class="save sec" id="anew" type="button" style="margin-top:8px">＋ Agregar activo</button></div>
+  <div class="card"><h2>Costo por activo</h2><div class="fil"><div><label for="ra">Activo</label><select id="ra"></select></div><div><label for="ry">Año</label><select id="ry"></select></div></div><div id="rbody" style="margin-top:8px"></div></div>
+  <div class="card"><h2>Recordatorios</h2><label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="acorreo" style="width:auto"> Recordatorios por correo (apagado por defecto)</label><p class="hint" style="margin-top:6px">Los avisos dentro de la app siempre funcionan. El correo necesita autorizar un permiso una sola vez en el script; se activa cuando usted lo decida.</p><div class="msg" id="amsg2"></div></div>
+</section>
+<div id="edit"><div id="edit-body"></div></div>
 
 <section class="pg" id="pg-ana">
   <div class="card"><div class="fil">
@@ -211,7 +239,7 @@ svg{width:100%;height:auto;display:block}svg text{fill:var(--ink2);font:10.5px s
 </section>
 </div>
 
-<nav class="tabs"><button class="on" data-p="reg"><b>＋</b>Registrar</button><button data-p="hoy"><b>◔</b>Hoy</button><button data-p="ana"><b>▤</b>Análisis</button><button data-p="cfg"><b>⚙</b>Conexión</button></nav>
+<nav class="tabs"><button class="on" data-p="reg"><b>＋</b>Registrar</button><button data-p="hoy"><b>◔</b>Hoy</button><button data-p="his"><b>☰</b>Historial</button><button data-p="act"><b>⌂</b>Activos</button><button data-p="ana"><b>▤</b>Análisis</button><button data-p="cfg"><b>⚙</b>Conexión</button></nav>
 
 <script>
 const PFX="g";
@@ -225,7 +253,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-04.9";
+const APP_V="2026-11-07.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -251,7 +279,7 @@ const rd=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const rm=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const ERR={llave:"Llave incorrecta",limite:"Demasiadas peticiones, espere un momento",valor:"Valor inválido",fecha:"Fecha inválida",medio:"Medio de pago inválido",
-  categoria:"Categoría no válida (si es «Otros», elíjala de la lista completa)",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",foto_repetida:"Esa foto ya está guardada",ocupado:"Ocupado, reintente"};
+  categoria:"Categoría no válida (si es «Otros», elíjala de la lista completa)",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",foto_repetida:"Esa foto ya está guardada",ocupado:"Ocupado, reintente",activo:"Activo no válido",nombre:"Nombre no válido",duplicado:"Ya existe uno con ese nombre",no_existe:"Ese registro ya no existe",nada:"No hay cambios para deshacer",tipo:"Tipo inválido",id:"Registro inválido"};
 const fmt=n=>"$ "+Math.round(n).toLocaleString("es-CO");
 const cmp=n=>{const a=Math.abs(n);return (n<0?"-":"")+(a>=1e6?(a/1e6).toFixed(a>=1e7?0:1).replace(".",",")+" M":a>=1e3?Math.round(a/1e3)+" mil":Math.round(a))};
 const pad=n=>String(n).padStart(2,"0");
@@ -289,7 +317,7 @@ async function lockProcesa(){
     const vieja=rd(PFX+"_llave");try{wr(PFX+"_llavec",await sellar(pinBuf,vieja));rm(PFX+"_llave");LLAVE=vieja;desbloquear()}catch(e){lmsg("No se pudo guardar el PIN")}}
 }
 function desbloquear(){$("lock").style.display="none";lmsg("");pinBuf="";ultimoUso=Date.now();iniciaApp()}
-function bloquear(){LLAVE="";MOV=null;lockMostrar("entrar")}
+function bloquear(){LLAVE="";MOV=null;HIS=null;lockMostrar("entrar")}
 $("forgot").onclick=()=>{if(confirm("Se borrará la llave guardada en este teléfono y tendrá que escribirla de nuevo. ¿Continuar?")){rm(PFX+"_llavec");rm(PFX+"_llave");LLAVE="";$("lock").style.display="none";irA("cfg")}};
 ["click","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,()=>{ultimoUso=Date.now()},{passive:true}));
 setInterval(()=>{if(LLAVE&&Date.now()-ultimoUso>5*60000)bloquear()},20000);
@@ -373,18 +401,20 @@ $("save").onclick=async()=>{
   if(fechaSel==="otra"){if(!$("fecha").value)return msg("Elija la fecha",1);fecha=$("fecha").value}
   const o={accion:"gasto",id:nuevoId(),valor:valor,tipo:tipo,grupo:sel.g,categoria:sel.c,medio:medio||undefined,comercio:$("com").value.trim()||undefined,nota:$("desc").value.trim()||undefined,fecha:fecha,origen:"pagina"};
   if(fotoB64){o.foto_b64=fotoB64;o.tipo_doc=tdoc}
+  if(actSel)o.activo_id=actSel;const tg=$("tags").value.trim();if(tg)o.etiquetas=tg;
+  const pv=pagoVenc&&pagoVenc.activo_id===actSel?pagoVenc:null;
   msg("Guardando...",0);$("save").disabled=true;
-  try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);sonidoGuardado();limpia();MOV=null}
+  try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);sonidoGuardado();limpia();MOV=null;HIS=null;if(pv){pagoVenc=null;cierraPago(pv,o.id)}}
   catch(e){
     if(e.api){msg(e.message,1)}
     else{const q=cola();q.push(o);if(guardaCola(q)){msg("Sin conexión: quedó en cola ("+q.length+"). Se envía al abrir con señal.",2);limpia()}else msg("Sin conexión y no se pudo guardar en cola",1)}
   }
   $("save").disabled=false;
 };
-function limpia(){v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";$("com").value="";$("desc").value="";pintaCats();pintaBtns()}
+function limpia(){actSel="";$("tags").value="";pintaActivosReg();v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";$("com").value="";$("desc").value="";pintaCats();pintaBtns()}
 
 /* ---- Hoy ---- */
-async function hoy(){
+async function hoy(){banVen();
   $("hfecha").textContent=new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"});
   $("hlist").innerHTML=LDR;
   try{const n=await vaciarCola();if(n)$("hmsg").textContent=n+" movimiento(s) de la cola enviados."}catch(e){}
@@ -544,10 +574,171 @@ function tarjetasExtra(G,a,b,grp,inR){
   $("ch-subs").innerHTML=barsH(filas.map(x=>({n:x.n,v:x.v,txt:cmp(x.v)+"/mes · "+cmp(x.v*12)+"/año"})),0)+(filas.length?`<div class="hint" style="margin-top:.5rem">Total proyectado: <b>${fmt(anual)}</b> al año en ${filas.length} conceptos.</div>`:"");
 }
 
+
+/* ---- Activos, etiquetas, historial, vencimientos ---- */
+let ACT={activos:[],vencimientos:[],etiquetas:[],tipos:[],aviso:false},actSel="",pagoVenc=null,HIS=null,hisAt=0,hLim=80,UMB=Number(rd("g_umbral"))||1000000;
+async function cargaActivos(){
+  try{const r=await get("activos");ACT={activos:r.activos,vencimientos:r.vencimientos,etiquetas:r.etiquetas,tipos:r.tipos_vencimiento,aviso:r.aviso_correo};wr("g_act",JSON.stringify(ACT))}
+  catch(e){try{const c=JSON.parse(rd("g_act")||"null");if(c)ACT=c}catch(x){}}
+  pintaActivosReg()}
+const actNombre=id=>{const a=ACT.activos.find(x=>x.id===id);return a?a.nombre:""};
+const norm=s=>String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function pintaActivosReg(){const l=ACT.activos.filter(a=>a.activo);$("actbox").style.display=l.length?"block":"none";
+  $("actchips").innerHTML=l.map(a=>`<button type="button" class="chip ${actSel===a.id?"on":""}" data-ac="${esc(a.id)}">${esc(a.nombre)}</button>`).join("");
+  $("tagl").innerHTML=ACT.etiquetas.map(t=>`<option value="${esc(t)}">`).join("")}
+document.addEventListener("click",e=>{const a=e.target.closest("#actchips [data-ac]");if(a){actSel=actSel===a.dataset.ac?"":a.dataset.ac;pintaActivosReg()}});
+const vDias=x=>Math.round((new Date(x.fecha+"T12:00:00")-new Date(iso(new Date())+"T12:00:00"))/864e5);
+function banVen(){const l=ACT.vencimientos.filter(x=>x.estado==="vigente"&&vDias(x)<=x.dias).sort((a,b)=>a.fecha<b.fecha?-1:1);
+  $("hven").innerHTML=l.length?`<div class="card" style="margin-bottom:9px"><h2>Vencimientos próximos</h2>`+l.map(x=>{const d=vDias(x);return `<div style="font-size:.88rem;padding:.2rem 0">${d<0?"⚠ vencido hace "+(-d)+" d":d===0?"⚠ hoy":"en "+d+" d"} · <b>${esc(x.tipo)}</b> · ${esc(actNombre(x.activo_id))}</div>`}).join("")+`</div>`:""}
+
+/* Historial */
+async function cargaHis(f){if(!f&&HIS&&Date.now()-hisAt<120000)return;const r=await get("historial");HIS=r.movimientos;hisAt=Date.now()}
+function rangoH(p){const h=new Date(),y=h.getFullYear(),m=h.getMonth(),ini=(a,b)=>iso(new Date(a,b,1)),fin=(a,b)=>iso(new Date(a,b+1,0));
+  if(p==="m0")return[ini(y,m),iso(h)];if(p==="m1")return[ini(y,m-1),fin(y,m-1)];if(p==="d30")return[iso(new Date(h-29*864e5)),iso(h)];if(p==="d90")return[iso(new Date(h-89*864e5)),iso(h)];
+  if(p==="y0")return[y+"-01-01",iso(h)];if(p==="y1")return[(y-1)+"-01-01",(y-1)+"-12-31"];return["0000-01-01",iso(h)]}
+async function historial(){
+  if(!$("hper").options.length){$("hper").innerHTML=[["m0","Este mes"],["m1","Mes pasado"],["d30","Últimos 30 días"],["d90","Últimos 90 días"],["y0","Este año"],["y1","Año pasado"],["all","Todo"]].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");$("humb").value=UMB}
+  $("hl2").innerHTML=LDR;
+  try{await cargaHis()}catch(e){$("hmsg2").textContent=e.message;$("hmsg2").className="msg err";$("hl2").innerHTML="";return}
+  $("hmsg2").textContent="";
+  const pa=$("hact").value,pc=$("hcat").value;
+  $("hact").innerHTML='<option value="">Todos</option><option value="__ninguno">Sin activo</option>'+ACT.activos.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("");$("hact").value=pa;
+  const gr={};(catalogo?catalogo.categorias:[]).forEach(x=>(gr[x.g]=gr[x.g]||[]).push(x));
+  $("hcat").innerHTML='<option value="">Todas</option>'+Object.keys(gr).map(g=>`<optgroup label="${esc(g)}">`+gr[g].map(x=>`<option value="${esc(g)}|${esc(x.c)}">${esc(x.c)}</option>`).join("")+"</optgroup>").join("");$("hcat").value=pc;
+  pintaHis()}
+function filtraHis(usaPeriodo){
+  const r=rangoH($("hper").value),q=norm($("hq").value).split(/\s+/).filter(Boolean),t=$("ht").value,a=$("hact").value,ca=$("hcat").value,an=$("han").checked;
+  return HIS.filter(m=>(!usaPeriodo||(m.f>=r[0]&&m.f<=r[1]))&&(!t||m.t===t)&&(an||m.e!=="anulado")&&(!a||(a==="__ninguno"?!m.act:m.act===a))&&(!ca||(m.g+"|"+m.c)===ca)&&
+    (!q.length||q.every(w=>norm([m.c,m.g,m.com,m.nota,m.tg,actNombre(m.act)].join(" ")).indexOf(w)>=0)))}
+const kp=(a,b,c)=>`<div><small>${a}</small><b>${b}</b><span class="d">${c}</span></div>`;
+function pintaHis(){
+  const r=rangoH($("hper").value),L=filtraHis(true).sort((x,y)=>x.f<y.f?1:x.f>y.f?-1:0),ok=L.filter(m=>m.e!=="anulado"),G=ok.filter(m=>m.t==="G"),I=ok.filter(m=>m.t==="I");
+  const min=ok.length?ok.reduce((s,m)=>m.f<s?m.f:s,"9999"):r[1],ini=r[0]>min?r[0]:min,dias=Math.max(1,Math.round((new Date(r[1]+"T12:00:00")-new Date(ini+"T12:00:00"))/864e5)+1);
+  const tg=sum(G),ti=sum(I),chicos=G.filter(m=>m.v<UMB),gs=sum(chicos),big=G.length-chicos.length;
+  $("hkpi").innerHTML=kp("Gastos",fmt(tg),G.length+" mov.")+kp("Ingresos",fmt(ti),I.length+" mov.")+kp("Gasto diario",fmt(tg/dias),"sin únicos: "+fmt(gs/dias))+kp("Gasto semanal",fmt(tg/dias*7),"sin únicos: "+fmt(gs/dias*7))+
+    kp("Ingreso diario",fmt(ti/dias),dias+" días")+kp("Ingreso semanal",fmt(ti/dias*7),"Neto: "+fmt(ti-tg));
+  $("hnota").textContent=big?big+" gasto(s) de "+fmt(UMB)+" o más se excluyen de «sin únicos».":"";
+  // comparación por año de lo buscado (todo el historial)
+  const q=$("hq").value.trim(),por={};
+  if(q)filtraHis(false).filter(m=>m.e!=="anulado"&&m.t==="G").forEach(m=>{const y=m.f.slice(0,4);(por[y]=por[y]||[]).push(m.v)});
+  const ys=Object.keys(por).sort();$("hanio").style.display=q&&ys.length?"block":"none";
+  let prev=0;$("hanioT").innerHTML=`<table class="tbl"><tr><th>Año</th><th>Veces</th><th>Promedio</th><th>Mín – Máx</th><th>Var.</th></tr>`+ys.map(y=>{const a=por[y],p=sum(a.map(x=>({v:x})))/a.length,h=`<tr><td>${y}</td><td>${a.length}</td><td>${fmt(p)}</td><td>${cmp(Math.min.apply(null,a))} – ${cmp(Math.max.apply(null,a))}</td><td>${prev?deltaTxt(p,prev,true):"—"}</td></tr>`;prev=p;return h}).join("")+"</table>";
+  $("hl2").innerHTML=L.slice(0,hLim).map(m=>`<div class="item" style="${m.e==="anulado"?"opacity:.55":""}"><div>${esc(m.c)}${m.e==="pendiente"?' <span class="pill">por confirmar</span>':""}${m.e==="anulado"?' <span class="pill">anulado</span>':""}${m.foto?" 📎":""}<br><small>${m.f}${m.com?" · "+esc(m.com):""}${m.med?" · "+m.med:""}${m.act?" · "+esc(actNombre(m.act)):""}</small>${m.nota?"<br><small>"+esc(m.nota)+"</small>":""}${m.tg?"<br><small>"+m.tg.split(", ").map(x=>"#"+esc(x)).join(" ")+"</small>":""}</div><div style="text-align:right"><b>${m.t==="I"?"+":""}${fmt(m.v)}</b><br><button type="button" class="mini" data-he="${esc(m.id)}">Editar</button></div></div>`).join("")||"<div class='item'>Sin resultados.</div>";
+  $("hmas").style.display=L.length>hLim?"block":"none"}
+$("hq").oninput=()=>{hLim=80;if(HIS)pintaHis()};
+["hper","ht","hact","hcat","han"].forEach(i=>$(i).onchange=()=>{hLim=80;if(HIS)pintaHis()});
+$("humb").onchange=()=>{UMB=Number($("humb").value.replace(/\D/g,""))||1000000;wr("g_umbral",String(UMB));$("humb").value=UMB;if(HIS)pintaHis()};
+$("hmas").onclick=()=>{hLim+=80;pintaHis()};
+$("hl2").onclick=e=>{const b=e.target.closest("[data-he]");if(b)abreEdMov(b.dataset.he)};
+
+/* Ventana de edición (movimientos, activos, vencimientos) */
+const cierraEd=()=>{$("edit").style.display="none"};
+function abreEd(html){$("edit-body").innerHTML=html;$("edit").style.display="block";$("edit").scrollTop=0}
+const opt=(v,t,sel)=>`<option value="${esc(v)}"${sel?" selected":""}>${esc(t)}</option>`;
+const edMsg=(t,ok)=>{const m=$("ed-m");if(m){m.textContent=t;m.className="msg"+(ok?" ok":" err")}};
+function abreEdMov(id){
+  const m=HIS&&HIS.find(x=>x.id===id);if(!m)return;if(!catalogo){alert("Conecte la app para cargar las categorías");return}
+  const gr={};catalogo.categorias.forEach(x=>(gr[x.g]=gr[x.g]||[]).push(x));
+  const sinc=m.g==="Sin clasificar";
+  abreEd(`<h2 style="margin-top:0">Corregir movimiento</h2>
+    <label class="lbl" for="ed-tipo">Tipo</label><select id="ed-tipo">${opt("Gasto","Gasto",m.t==="G")}${opt("Ingreso","Ingreso",m.t==="I")}</select>
+    <label class="lbl" for="ed-val">Valor</label><input id="ed-val" inputmode="numeric" value="${m.v}">
+    <label class="lbl" for="ed-fecha">Fecha</label><input id="ed-fecha" type="date" value="${m.f}">
+    <label class="lbl" for="ed-cat">Categoría</label><select id="ed-cat">${sinc?opt("","(por clasificar)",true):""}${Object.keys(gr).map(g=>`<optgroup label="${esc(g)}">`+gr[g].map(x=>opt(g+"|"+x.c,x.c,g===m.g&&x.c===m.c)).join("")+"</optgroup>").join("")}</select>
+    <label class="lbl" for="ed-med">Medio de pago</label><select id="ed-med">${opt("","—",!m.med)}${MEDIOS.map(x=>opt(x,x,x===m.med)).join("")}</select>
+    <label class="lbl" for="ed-com">Comercio</label><input id="ed-com" maxlength="60" value="${esc(m.com)}">
+    <label class="lbl" for="ed-nota">Descripción</label><input id="ed-nota" maxlength="140" value="${esc(m.nota)}">
+    <label class="lbl" for="ed-act">Activo</label><select id="ed-act">${opt("","— ninguno —",!m.act)}${ACT.activos.map(a=>opt(a.id,a.nombre,a.id===m.act)).join("")}</select>
+    <label class="lbl" for="ed-tags">Etiquetas</label><input id="ed-tags" maxlength="80" value="${esc(m.tg)}" placeholder="vacunas, hijos">
+    <button class="save" id="ed-ok" type="button" style="margin-top:12px">Guardar cambios</button>
+    <button class="save sec" id="ed-anu" type="button" style="margin-top:6px">${m.e==="anulado"?"Restaurar movimiento":"Anular movimiento"}</button>
+    ${m.u?'<button class="save sec" id="ed-und" type="button" style="margin-top:6px">Deshacer el último cambio</button>':""}
+    <button class="save sec" id="ed-x" type="button" style="margin-top:6px">Cancelar</button><div class="msg" id="ed-m"></div>
+    <p class="hint" style="margin-top:6px">Todo cambio queda registrado en la hoja Auditoría con el valor anterior.</p>`);
+  const send=async o=>{edMsg("Guardando...",true);try{await post(Object.assign({id:id},o));sonidoGuardado();cierraEd();HIS=null;MOV=null;await historial()}catch(er){edMsg(er.message)}};
+  $("ed-x").onclick=cierraEd;
+  $("ed-ok").onclick=()=>{const val=Number($("ed-val").value.replace(/\D/g,""));if(!(val>0))return edMsg("Escriba un valor");const c=$("ed-cat").value.split("|");
+    send({accion:"movimiento_editar",tipo:$("ed-tipo").value,valor:val,fecha:$("ed-fecha").value,grupo:c[0]||undefined,categoria:c[1]||undefined,medio:$("ed-med").value||undefined,comercio:$("ed-com").value.trim()||undefined,nota:$("ed-nota").value.trim()||undefined,activo_id:$("ed-act").value||undefined,etiquetas:$("ed-tags").value})};
+  $("ed-anu").onclick=()=>{if(m.e==="anulado")send({accion:"movimiento_editar",restaurar:true});else if(confirm("¿Anular este movimiento? Dejará de contarse, pero podrá restaurarlo."))send({accion:"movimiento_editar",anular:true})};
+  if($("ed-und"))$("ed-und").onclick=()=>{if(confirm("¿Deshacer el último cambio hecho a este movimiento?"))send({accion:"movimiento_deshacer"})}}
+
+/* Activos y vencimientos */
+async function activos(){
+  $("vlist").innerHTML=LDR;
+  await cargaActivos();
+  try{await cargaHis()}catch(e){}
+  pintaVen();pintaAct();pintaRep();$("acorreo").checked=!!ACT.aviso}
+function pintaVen(){const l=ACT.vencimientos.filter(x=>x.estado==="vigente").sort((a,b)=>a.fecha<b.fecha?-1:1);
+  $("vlist").innerHTML=l.map(x=>{const d=vDias(x),est=d<0?`<span class="pill" style="background:#f6d4d1;color:var(--crit)">vencido hace ${-d} d</span>`:d<=x.dias?`<span class="pill">en ${d} d</span>`:`<span class="pill" style="background:var(--acc-t);color:var(--acc)">en ${d} d</span>`;
+    return `<div class="item"><div><span style="font-weight:650">${esc(x.tipo)}</span> · ${esc(actNombre(x.activo_id))} ${est}<br><small>${x.fecha}${x.entidad?" · "+esc(x.entidad):""}${x.poliza?" · póliza "+esc(x.poliza):""}${x.valor!==""?" · aprox. "+fmt(x.valor):""}${x.avisar?" · 🔔":""}</small></div><div style="text-align:right"><button type="button" class="mini" data-vp="${esc(x.id)}">Pagar</button> <button type="button" class="mini" data-ve="${esc(x.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay vencimientos. Agregue el SOAT, el seguro o el impuesto de cada activo.</div>"}
+function pintaAct(){const y=String(new Date().getFullYear()),G=(HIS||[]).filter(m=>m.t==="G"&&m.e!=="anulado"&&m.act);
+  $("alist").innerHTML=ACT.activos.map(a=>{const g=G.filter(m=>m.act===a.id);return `<div class="item"><div><span style="font-weight:650">${esc(a.nombre)}</span>${a.activo?"":" <span class='pill'>inactivo</span>"}<br><small>${esc(a.tipo)}${a.identificador?" · "+esc(a.identificador):""}</small></div><div style="text-align:right"><b>${fmt(sum(g.filter(m=>m.f.slice(0,4)===y)))}</b><br><small>este año · total ${cmp(sum(g))}</small><br><button type="button" class="mini" data-ae="${esc(a.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay activos. Agregue sus vehículos, predios u otros.</div>"}
+function pintaRep(){
+  const ra=$("ra"),ry=$("ry"),pa=ra.value,py=ry.value;
+  ra.innerHTML='<option value="">Todos los activos</option>'+ACT.activos.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("");ra.value=pa;
+  const base=(HIS||[]).filter(m=>m.t==="G"&&m.e!=="anulado"&&(ra.value?m.act===ra.value:!!m.act));
+  const ys=Array.from(new Set(base.map(m=>m.f.slice(0,4)))).sort().reverse();ry.innerHTML=ys.map(y=>`<option>${y}</option>`).join("");if(ys.indexOf(py)>=0)ry.value=py;
+  if(!base.length){$("rbody").innerHTML='<div class="hint">Aún no hay gastos asignados. Al registrar un gasto, elija el activo.</div>';return}
+  const y=ry.value,del=base.filter(m=>m.f.slice(0,4)===y),hoyD=new Date(),meses=String(hoyD.getFullYear())===y?hoyD.getMonth()+1:12;
+  const porY={};base.forEach(m=>{const k=m.f.slice(0,4);porY[k]=(porY[k]||0)+m.v});
+  const yl=Object.keys(porY).sort();
+  const mm=[];for(let k=1;k<=12;k++){const s=sum(del.filter(m=>+m.f.slice(5,7)===k));mm.push({n:MESES[k-1],v:s})}
+  const pc=agrupa(del,m=>m.c),cats=Object.keys(pc).map(k=>({n:k,v:pc[k].v})).sort((a,b)=>b.v-a.v).slice(0,10);
+  $("rbody").innerHTML=`<div class="kpi">${kp("Total histórico",fmt(sum(base)),base.length+" gastos")}${kp("Total "+y,fmt(sum(del)),"Promedio mensual "+cmp(sum(del)/meses))}</div>
+    <h2 style="margin-top:12px">Año contra año</h2><table class="tbl"><tr><th>Año</th><th>Total</th><th>Var.</th></tr>${yl.map((k,i)=>`<tr><td>${k}</td><td>${fmt(porY[k])}</td><td>${i?deltaTxt(porY[k],porY[yl[i-1]],true):"—"}</td></tr>`).join("")}</table>
+    <h2 style="margin-top:12px">Por mes en ${y}</h2>${barsH(mm,0)}
+    <h2 style="margin-top:12px">Por categoría en ${y}</h2>${barsH(cats,sum(del))}`}
+$("ra").onchange=$("ry").onchange=()=>pintaRep();
+$("vlist").onclick=e=>{const p=e.target.closest("[data-vp]"),d=e.target.closest("[data-ve]");if(p)pagaVen(p.dataset.vp);if(d)abreEdVen(d.dataset.ve)};
+$("alist").onclick=e=>{const d=e.target.closest("[data-ae]");if(d)abreEdAct(d.dataset.ae)};
+$("anew").onclick=()=>abreEdAct("");$("vnew").onclick=()=>abreEdVen("");
+function abreEdAct(id){const a=ACT.activos.find(x=>x.id===id)||{id:"",nombre:"",tipo:"vehiculo",identificador:"",notas:"",activo:true};
+  abreEd(`<h2 style="margin-top:0">${id?"Editar activo":"Nuevo activo"}</h2>
+    <label class="lbl" for="ea-n">Nombre</label><input id="ea-n" maxlength="60" value="${esc(a.nombre)}" placeholder="Ej: Mazda 3, Lote La Mesa">
+    <label class="lbl" for="ea-t">Tipo</label><select id="ea-t">${opt("vehiculo","Vehículo",a.tipo==="vehiculo")}${opt("predio","Predio / terreno",a.tipo==="predio")}${opt("otro","Otro",a.tipo==="otro")}</select>
+    <label class="lbl" for="ea-i">Placa o matrícula (opcional)</label><input id="ea-i" maxlength="30" value="${esc(a.identificador)}">
+    <label class="lbl" for="ea-o">Notas (opcional)</label><input id="ea-o" maxlength="140" value="${esc(a.notas)}">
+    <label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="ea-a" style="width:auto"${a.activo?" checked":""}> Activo en uso</label>
+    <button class="save" id="ed-ok" type="button" style="margin-top:12px">Guardar</button><button class="save sec" id="ed-x" type="button" style="margin-top:6px">Cancelar</button><div class="msg" id="ed-m"></div>`);
+  $("ed-x").onclick=cierraEd;
+  $("ed-ok").onclick=async()=>{if(!$("ea-n").value.trim())return edMsg("Escriba el nombre");edMsg("Guardando...",true);
+    try{await post({accion:"activo",id:id||undefined,nombre:$("ea-n").value,tipo:$("ea-t").value,identificador:$("ea-i").value,notas:$("ea-o").value,activo:$("ea-a").checked});sonidoGuardado();cierraEd();await activos()}catch(er){edMsg(er.message)}}}
+function abreEdVen(id){const x=ACT.vencimientos.find(z=>z.id===id)||{id:"",activo_id:"",tipo:"SOAT",fecha:"",valor:"",entidad:"",poliza:"",avisar:false,dias:30,estado:"vigente",notas:""};
+  if(!ACT.activos.length){alert("Primero agregue un activo");return}
+  const tipos=ACT.tipos&&ACT.tipos.length?ACT.tipos:["SOAT","Revisión técnico-mecánica","Seguro todo riesgo","Impuesto vehicular","Predial","Administración","Otro"];
+  abreEd(`<h2 style="margin-top:0">${id?"Editar vencimiento":"Nuevo vencimiento"}</h2>
+    <label class="lbl" for="ev-a">Activo</label><select id="ev-a">${ACT.activos.map(a=>opt(a.id,a.nombre,a.id===x.activo_id)).join("")}</select>
+    <label class="lbl" for="ev-t">Tipo</label><select id="ev-t">${tipos.map(t=>opt(t,t,t===x.tipo)).join("")}</select>
+    <label class="lbl" for="ev-f">Fecha de vencimiento</label><input id="ev-f" type="date" value="${x.fecha}">
+    <label class="lbl" for="ev-v">Valor aproximado (opcional)</label><input id="ev-v" inputmode="numeric" value="${x.valor}">
+    <label class="lbl" for="ev-e">Aseguradora o entidad (opcional)</label><input id="ev-e" maxlength="60" value="${esc(x.entidad)}">
+    <label class="lbl" for="ev-p">Número de póliza (opcional)</label><input id="ev-p" maxlength="40" value="${esc(x.poliza)}">
+    <label class="lbl" for="ev-d">Avisar con cuántos días de anticipación</label><input id="ev-d" inputmode="numeric" value="${x.dias}">
+    <label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="ev-r" style="width:auto"${x.avisar?" checked":""}> Recordarme por correo cuando esté activado 🔔</label>
+    ${id?`<label class="lbl" for="ev-s">Estado</label><select id="ev-s">${opt("vigente","Vigente",x.estado==="vigente")}${opt("pagado","Pagado",x.estado==="pagado")}${opt("archivado","Archivado",x.estado==="archivado")}</select>`:""}
+    <label class="lbl" for="ev-n">Notas (opcional)</label><input id="ev-n" maxlength="140" value="${esc(x.notas)}">
+    <button class="save" id="ed-ok" type="button" style="margin-top:12px">Guardar</button><button class="save sec" id="ed-x" type="button" style="margin-top:6px">Cancelar</button><div class="msg" id="ed-m"></div>`);
+  $("ed-x").onclick=cierraEd;
+  $("ed-ok").onclick=async()=>{if(!$("ev-f").value)return edMsg("Elija la fecha");edMsg("Guardando...",true);
+    try{await post({accion:"vencimiento",id:id||undefined,activo_id:$("ev-a").value,tipo:$("ev-t").value,fecha:$("ev-f").value,valor:$("ev-v").value.replace(/\D/g,""),entidad:$("ev-e").value,poliza:$("ev-p").value,dias:Number($("ev-d").value)||30,avisar:$("ev-r").checked,estado:$("ev-s")?$("ev-s").value:"vigente",mov_id:x.mov_id||undefined,notas:$("ev-n").value});sonidoGuardado();cierraEd();await activos()}catch(er){edMsg(er.message)}}}
+function pagaVen(id){const x=ACT.vencimientos.find(z=>z.id===id);if(!x)return;
+  tipo="Gasto";document.querySelectorAll("#tipo button").forEach(b=>b.classList.toggle("on",b.dataset.t==="Gasto"));
+  v=String(Math.round(x.valor||0));sel=null;actSel=x.activo_id;$("tags").value=norm(x.tipo).replace(/[^a-z ]/g,"").trim();$("com").value=x.entidad||"";$("desc").value=x.tipo+" · "+actNombre(x.activo_id);
+  pagoVenc=x;pintaCats();pintaBtns();pintaActivosReg();irA("reg");msg("Elija la categoría y guarde para registrar el pago",0)}
+async function cierraPago(x,movId){
+  try{const base={accion:"vencimiento",activo_id:x.activo_id,tipo:x.tipo,valor:x.valor,entidad:x.entidad,poliza:x.poliza,avisar:x.avisar,dias:x.dias,notas:x.notas};
+    await post(Object.assign({id:x.id,fecha:x.fecha,estado:"pagado",mov_id:movId},base));
+    const f=new Date(x.fecha+"T12:00:00");f.setFullYear(f.getFullYear()+1);
+    if(confirm("Pago registrado. ¿Crear el próximo vencimiento de "+x.tipo+" para el "+iso(f)+"?"))await post(Object.assign({fecha:iso(f),estado:"vigente"},base));
+    await cargaActivos()}
+  catch(e){msg("Pago guardado, pero no se pudo actualizar el vencimiento: "+e.message,1)}}
+$("acorreo").onchange=async e=>{const box=e.target;try{await post({accion:"aviso_config",correo:box.checked});ACT.aviso=box.checked;$("amsg2").textContent=box.checked?"Activado. Recuerde autorizar el permiso de correo en el script para que lleguen los avisos.":"Apagado.";$("amsg2").className="msg ok"}catch(er){box.checked=!box.checked;$("amsg2").textContent=er.message;$("amsg2").className="msg err"}};
+
+
 /* ---- navegación y configuración ---- */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
   document.querySelectorAll(".pg").forEach(x=>x.classList.toggle("on",x.id==="pg-"+p));
-  if(p==="hoy")hoy();if(p==="ana")analisis()}
+  if(p==="hoy")hoy();if(p==="ana")analisis();if(p==="his")historial();if(p==="act")activos()}
 document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-p]");if(b)irA(b.dataset.p)};
 $("gcfg").onclick=async()=>{
   const url=$("url").value.trim(),llave=$("llave").value.trim(),p1=$("pin1").value,p2=$("pin2").value,m=$("mcfg");m.className="msg err";
@@ -568,7 +759,7 @@ $("url").value=rd(PFX+"_url");
 const sndLbl=()=>{$("snd").textContent="Sonido de bienvenida: "+(rd(PFX+"_snd")==="0"?"desactivado":"activado")};
 $("snd").onclick=()=>{wr(PFX+"_snd",rd(PFX+"_snd")==="0"?"1":"0");sndLbl();if(rd(PFX+"_snd")!=="0")sonidoOk()};sndLbl();
 
-function iniciaApp(){pintaBtns();cargaCatalogo();vaciarCola().catch(()=>{});irA("reg")}
+function iniciaApp(){pintaBtns();cargaCatalogo();cargaActivos();vaciarCola().catch(()=>{});irA("reg")}
 (function arranque(){
   pintaBtns();
   if(rd(PFX+"_llavec"))lockMostrar("entrar");
