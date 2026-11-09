@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-07.2">
+<meta name="app-version" content="2026-11-08.2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -125,7 +125,7 @@ input[type=file]{display:none}
   <div class="sp-pasos" id="sp-pasos" aria-hidden="true"></div>
   <button class="sp-enter" id="enter" type="button">Ingresar</button>
 </div>
-<div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
+<div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="save sec" id="bio" type="button" style="display:none;width:auto;padding:.7rem 1.6rem;margin:0">Usar huella</button><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
 
 <div class="wrap">
 <h1>Health &amp; Wellness</h1>
@@ -164,6 +164,9 @@ input[type=file]{display:none}
     <div class="g2"><div><label for="kcal">Calorías (kcal)</label><input id="kcal" type="number" inputmode="numeric" placeholder="opcional"></div>
       <div><label for="prot">Proteína (g)</label><input id="prot" type="number" inputmode="decimal" placeholder="opcional"></div></div>
     <button class="save sec" id="estima" type="button" style="margin-top:.5rem">Estimar con la descripción</button><div class="msg" id="est-m" style="color:var(--ink2)"></div>
+    <div class="g2" style="margin-top:.4rem"><button class="save sec" id="ia-go" type="button" style="display:none;margin-top:0">✨ Analizar con IA</button><button class="save sec" id="ia-paste" type="button" style="margin-top:0">📋 Pegar respuesta</button></div>
+    <div id="ia-pegar" style="display:none"><label for="ia-txt">Pegue la respuesta de Gemini o Claude (con el bloque REGISTRO_APP … FIN_REGISTRO)</label><textarea id="ia-txt"></textarea><button class="save" id="ia-leer" type="button">Leer respuesta</button></div>
+    <div id="ia-card"></div>
     <label>¿Siguió el recetario?</label><div class="btns" id="rec"></div>
     <label>Foto (opcional)</label>
     <div class="chipfoto"><label class="b" for="foto">📷 Cámara</label><label class="b" for="fotoG">🖼 Galería</label></div>
@@ -189,6 +192,7 @@ input[type=file]{display:none}
     <div id="ch-kcal"></div><div id="kcal-tab"></div></div>
   <div class="card"><h2>Proteína contra objetivo</h2>
     <div class="leg"><span><i style="background:var(--s1)"></i>Proteína</span><span><i style="background:var(--s3)"></i>Objetivo</span></div><div id="ch-prot"></div></div>
+  <div class="card"><h2>Semáforo de comidas</h2><div id="ch-sem"></div></div>
   <div class="card"><h2>Ejercicio: calorías estimadas por semana</h2><div id="ch-kej"></div></div>
   <div class="card"><h2>Actividad por tipo (minutos)</h2><div id="ch-tipo"></div></div>
   <div class="card"><h2>IMC en el tiempo</h2><div id="ch-imc"></div></div>
@@ -223,6 +227,7 @@ input[type=file]{display:none}
     <button class="save" id="gcfg">Guardar</button>
     <button class="save sec" id="ping">Probar conexión</button>
     <button class="save sec" id="bloq">Bloquear ahora</button>
+    <button class="save sec" id="bioc" type="button">Activar huella (Touch ID)</button>
     <button class="save sec" id="snd" type="button">Sonido de bienvenida</button><div class="msg" id="mcfg"></div></div>
 </section>
 </div>
@@ -241,7 +246,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-07.2";
+const APP_V="2026-11-08.2";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -275,7 +280,7 @@ const di=s=>{const p=s.split("-").map(Number);return Math.floor(Date.UTC(p[0],p[
 const dIso=n=>{const d=new Date(n*864e5);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())};
 const ERR={llave:"Llave incorrecta",limite:"Demasiadas peticiones, espere un momento",fecha:"Fecha inválida (máximo 120 días atrás, no futura)",vacio:"Escriba al menos un dato",
   presion:"Revise la tensión: sistólica mayor que diastólica",peso_kg:"Peso fuera de rango",pulso:"Pulso fuera de rango",actividad:"Elija la actividad",actividad_min:"Escriba los minutos",hora:"Hora inválida",
-  comida:"Elija la comida",descripcion:"Escriba qué comió",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",ocupado:"Ocupado, reintente",intensidad:"Intensidad inválida",no_existe:"Ese registro ya no existe",tipo:"Tipo inválido",id:"Registro inválido",kcal_gasto:"Calorías de ejercicio fuera de rango",kcal_est:"Calorías fuera de rango",proteina_g_est:"Proteína fuera de rango"};
+  comida:"Elija la comida",descripcion:"Escriba qué comió",foto:"No se pudo leer la foto",foto_grande:"La foto es muy grande",ocupado:"Ocupado, reintente",intensidad:"Intensidad inválida",no_existe:"Ese registro ya no existe",tipo:"Tipo inválido",id:"Registro inválido",kcal_gasto:"Calorías de ejercicio fuera de rango",kcal_est:"Calorías fuera de rango",proteina_g_est:"Proteína fuera de rango",semaforo:"Semáforo inválido",sodio:"Sodio inválido",ia_no_configurada:"La IA aún no está activada (falta la llave en el script)",ia_error:"La IA no respondió, intente de nuevo",ia_limite:"La IA llegó a su límite por ahora, intente más tarde",ia_formato:"La IA respondió algo inesperado, intente de nuevo"};
 
 /* ===== PIN y llave cifrada ===== */
 const TXT=new TextEncoder(),DEC=new TextDecoder();
@@ -289,13 +294,14 @@ async function sellar(pin,txt){const salt=crypto.getRandomValues(new Uint8Array(
 async function abrir(pin,blob){const p=blob.split("."),key=await derivar(pin,fromB(p[0]));
   return DEC.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB(p[1])},key,fromB(p[2])))}
 function lockMostrar(m){modoLock=m;pinBuf="";pinPrimero="";$("lock").style.display="flex";pintaLock()}
-function pintaLock(){
+function pintaLock(){$("bio").style.display=(modoLock==="entrar"&&bioActiva())?"block":"none";
   $("ltit").textContent=modoLock==="entrar"?"Ingrese su PIN":modoLock==="crear"?"Cree un PIN de 6 dígitos":"Repita el PIN";
   $("dots").innerHTML=[0,1,2,3,4,5].map(i=>`<i class="${i<pinBuf.length?"on":""}"></i>`).join("")}
 function lmsg(t){$("lmsg").textContent=t}
 $("pk").innerHTML=["1","2","3","4","5","6","7","8","9","","0","⌫"].map(k=>k===""?'<button class="v" type="button" tabindex="-1"></button>':`<button type="button" data-lk="${k}">${k}</button>`).join("");
-$("pk").onclick=async e=>{const b=e.target.closest("[data-lk]");if(!b)return;const k=b.dataset.lk;
-  if(k==="⌫")pinBuf=pinBuf.slice(0,-1);else if(pinBuf.length<6)pinBuf+=k;pintaLock();if(pinBuf.length===6)await lockProcesa()};
+let pinBusy=false;
+$("pk").onpointerdown=async e=>{e.preventDefault();if(pinBusy)return;const b=e.target.closest("[data-lk]");if(!b)return;const k=b.dataset.lk;
+  if(k==="⌫")pinBuf=pinBuf.slice(0,-1);else if(pinBuf.length<6)pinBuf+=k;pintaLock();if(pinBuf.length===6){pinBusy=true;try{await lockProcesa()}finally{pinBusy=false}}};
 async function lockProcesa(){
   const bloq=Number(rd(PFX+"_lock")||0);if(bloq>Date.now()){lmsg("Bloqueado "+Math.ceil((bloq-Date.now())/60000)+" min por intentos fallidos");pinBuf="";pintaLock();return}
   if(modoLock==="entrar"){
@@ -308,13 +314,44 @@ async function lockProcesa(){
 }
 function desbloquear(){$("lock").style.display="none";lmsg("");pinBuf="";ultimoUso=Date.now();irA("reg")}
 function bloquear(){LLAVE="";cache=null;lockMostrar("entrar")}
-$("forgot").onclick=()=>{if(confirm("Se borrará la llave guardada en este teléfono y tendrá que escribirla de nuevo. ¿Continuar?")){rm(PFX+"_llavec");rm(PFX+"_llave");LLAVE="";$("lock").style.display="none";irA("cfg")}};
+$("forgot").onclick=()=>{if(confirm("Se borrará la llave guardada en este teléfono y tendrá que escribirla de nuevo. ¿Continuar?")){bioQuitar();rm(PFX+"_llavec");rm(PFX+"_llave");LLAVE="";$("lock").style.display="none";irA("cfg")}};
 ["click","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,()=>{ultimoUso=Date.now()},{passive:true}));
 setInterval(()=>{if(LLAVE&&Date.now()-ultimoUso>5*60000)bloquear()},20000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)ocultoDesde=Date.now();else if(LLAVE&&Date.now()-ocultoDesde>2*60000)bloquear()});
-let ultimoToque=0;document.addEventListener("touchend",e=>{const t=Date.now();if(t-ultimoToque<350&&e.target.closest("button,label"))e.preventDefault();ultimoToque=t},{passive:false});
 ["gesturestart","gesturechange","gestureend"].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
 
+/* ---- Huella (Touch ID) opcional: es una puerta extra; el PIN sigue siempre disponible ---- */
+const bioOk=!!(window.PublicKeyCredential&&navigator.credentials&&cripto&&window.indexedDB);
+const b64u=b=>btoa(String.fromCharCode.apply(null,new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+function idb(){return new Promise((ok,ko)=>{const r=indexedDB.open("ocarisa_bio",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)})}
+async function idbGet(k){const d=await idb();return new Promise((ok,ko)=>{const q=d.transaction("k").objectStore("k").get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}
+async function idbSet(k,v){const d=await idb();return new Promise((ok,ko)=>{const t=d.transaction("k","readwrite");t.objectStore("k").put(v,k);t.oncomplete=()=>ok();t.onerror=()=>ko(t.error)})}
+async function idbDel(k){const d=await idb();return new Promise(ok=>{const t=d.transaction("k","readwrite");t.objectStore("k").delete(k);t.oncomplete=()=>ok();t.onerror=()=>ok()})}
+const bioActiva=()=>!!rd(PFX+"_bio_id")&&!!rd(PFX+"_bio_blob");
+async function bioActivar(){
+  if(!bioOk)throw new Error("Este navegador no permite huella");
+  if(!LLAVE)throw new Error("Desbloquee primero con el PIN");
+  if(!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()))throw new Error("Este teléfono no ofrece huella para páginas web");
+  const cred=await navigator.credentials.create({publicKey:{rp:{name:"Ocarisa",id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:"ocarisa-"+PFX,displayName:"Ocarisa"},
+    challenge:crypto.getRandomValues(new Uint8Array(32)),pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"},timeout:60000}});
+  const key=await crypto.subtle.generateKey({name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+  const iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,TXT.encode(LLAVE));
+  await idbSet(PFX+"_bio_key",key);wr(PFX+"_bio_id",b64u(cred.rawId));wr(PFX+"_bio_blob",toB(iv)+"."+toB(ct))}
+async function bioEntrar(){
+  const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,allowCredentials:[{type:"public-key",id:unb64u(rd(PFX+"_bio_id")),transports:["internal"]}],userVerification:"required",timeout:60000}});
+  if(!a)throw new Error("cancelado");
+  const key=await idbGet(PFX+"_bio_key"),p=rd(PFX+"_bio_blob").split(".");
+  LLAVE=DEC.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB(p[0])},key,fromB(p[1])))}
+function bioQuitar(){rm(PFX+"_bio_id");rm(PFX+"_bio_blob");idbDel(PFX+"_bio_key").catch(()=>{})}
+$("bio").onclick=async()=>{lmsg("");try{await bioEntrar();desbloquear()}catch(e){lmsg("No se pudo con la huella; use el PIN")}};
+const bioLbl=()=>{$("bioc").textContent=bioActiva()?"Desactivar huella":"Activar huella (Touch ID)"};
+$("bioc").onclick=async()=>{const m=$("mcfg");m.className="msg";
+  if(bioActiva()){bioQuitar();bioLbl();m.textContent="Huella desactivada";return}
+  m.textContent="Confirme con su huella…";
+  try{await bioActivar();bioLbl();m.textContent="Huella activada. Al abrir la app toque «Usar huella».";m.className="msg ok"}
+  catch(e){m.textContent=e.name==="NotAllowedError"?"Cancelado o no permitido por el teléfono. Siga usando el PIN.":(e.message||"No se pudo activar la huella");m.className="msg err"}};
+bioLbl();
 const cfg=()=>({url:rd(PFX+"_url").trim(),llave:LLAVE});
 async function post(o){const c=cfg();if(!c.url||!c.llave)throw new Error("Desbloquee la app o configure la conexión");
   const r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({llave:c.llave},o))});
@@ -367,10 +404,10 @@ function comprimir(file){return new Promise((ok,ko)=>{const img=new Image(),u=UR
   img.onerror=()=>ko();img.src=u})}
 $("gc").onclick=async()=>{
   if(!comida)return msg("mc","Elija la comida","err");const f=fechaElegida();if(!f)return msg("mc","Elija la fecha","err");
-  const o={accion:"salud_comida",id:nuevoId("sc"),fecha:f,comida:comida,descripcion:$("desc").value,siguio_recetario:rec||undefined};const kc=num("kcal"),pt=num("prot");if(kc>0)o.kcal_est=kc;if(pt>0)o.proteina_g_est=pt;
+  const o={accion:"salud_comida",id:nuevoId("sc"),fecha:f,comida:comida,descripcion:$("desc").value,siguio_recetario:rec||undefined};const kc=num("kcal"),pt=num("prot");if(kc>0)o.kcal_est=kc;if(pt>0)o.proteina_g_est=pt;if(iaExtra.semaforo)o.semaforo=iaExtra.semaforo;if(iaExtra.sodio)o.sodio=iaExtra.sodio;if(iaExtra.ajuste)o.ajuste=iaExtra.ajuste;if(iaExtra.notas_ia)o.notas_ia=iaExtra.notas_ia;
   if(fotoB64)o.foto_b64=fotoB64;
   msg("mc","Guardando...");$("gc").disabled=true;
-  try{await post(o);msg("mc","Guardado ✓"+(fotoB64?" con foto":"")+" ("+f+")","ok");sonidoGuardado();$("desc").value="";$("kcal").value="";$("prot").value="";$("est-m").textContent="";comida="";rec="";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";pintaTodo();cache=null}
+  try{await post(o);msg("mc","Guardado ✓"+(fotoB64?" con foto":"")+" ("+f+")","ok");sonidoGuardado();$("desc").value="";$("kcal").value="";$("prot").value="";$("est-m").textContent="";iaExtra={semaforo:"",sodio:"",ajuste:"",notas_ia:""};$("ia-card").innerHTML="";comida="";rec="";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";pintaTodo();cache=null}
   catch(e){msg("mc",e.message,"err")}$("gc").disabled=false};
 
 /* Estimador aproximado de calorías: palabras clave -> [kcal, proteína g] por porción típica. Editable por la persona usuaria. */
@@ -382,6 +419,58 @@ function estima(txt){const s=" "+txt.toLowerCase()+" ";let k=0,p=0,hits=[];
   return {k:Math.round(k),p:Math.round(p),hits:hits}}
 $("estima").onclick=()=>{const r=estima($("desc").value||"");if(!r.hits.length)return msg("est-m","No reconocí alimentos en la descripción; escriba las calorías a mano si las conoce.");
   $("kcal").value=r.k;$("prot").value=r.p;msg("est-m","Estimado aproximado con: "+r.hits.join(", ")+". Corrija los números si no coinciden con lo que comió.")};
+
+
+/* ===== Análisis con IA y «Pegar respuesta» ===== */
+let iaExtra={semaforo:"",sodio:"",ajuste:"",notas_ia:""},iaChk=false,IAR=null;
+const SEMC={verde:"🟢",amarillo:"🟡",rojo:"🔴"};
+const nrm=s=>String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
+function numDe(v){const n=(String(v==null?"":v).replace(/(\d),(\d{3})/g,"$1$2").match(/\d+(?:\.\d+)?/g)||[]).map(Number);return n.length?Math.round(n.length>1?(n[0]+n[1])/2:n[0]):""}
+function enLista(v,l){v=nrm(v).replace(/[^a-z_ ]/g,"").trim();return l.indexOf(v)>=0?v:""}
+function parseRegistro(t){
+  const m=/REGISTRO_APP([\s\S]*?)FIN_REGISTRO/i.exec(String(t||""));if(!m)return null;
+  const o={};m[1].replace(/\s(fecha|comida|descripcion|siguio_recetario|semaforo|kcal_est|proteina_g_est|sodio|ajuste_sugerido|notas):/gi,"\n$1:").split(/\r?\n/).forEach(l=>{const i=l.indexOf(":");if(i<1)return;o[nrm(l.slice(0,i)).replace(/\s+/g,"_")]=l.slice(i+1).trim()});
+  const av=[],hoy=iso(new Date());
+  let fecha=(/^\d{4}-\d{2}-\d{2}/.exec(o.fecha||"")||[""])[0];
+  if(fecha){const dd=di(hoy)-di(fecha);if(dd<0||dd>120){av.push("La fecha "+fecha+" está fuera del rango permitido; se usará la que elija arriba.");fecha=""}}else av.push("No se leyó la fecha; se usará la que elija arriba.");
+  const comida=enLista((o.comida||"").replace(/\s+/g,"_"),Object.keys(NOMC));if(!comida)av.push("No se reconoció la comida; elíjala en la lista.");
+  const r={fecha:fecha,comida:comida,identificado:"",descripcion:o.descripcion||"",kcal:numDe(o.kcal_est),prot:numDe(o.proteina_g_est),sr:enLista(o.siguio_recetario,["si","parcial","no"]),
+    semaforo:enLista(o.semaforo,["verde","amarillo","rojo"]),sodio:enLista(o.sodio,["bajo","medio","alto"]),ajuste:o.ajuste_sugerido||"",notas:o.notas||"",pregunta:"",avisos:av};
+  if(!r.descripcion)av.push("Falta la descripción.");if(r.kcal==="")av.push("No se leyeron las calorías.");
+  return r}
+function iaMuestra(r,dia,fuente){
+  IAR=r;
+  const sc=SEMC[r.semaforo]||"⚪",pie=dia&&r.kcal!==""?`<p style="margin:.4rem 0;font-size:.85rem">Con esto el día va en <b>${dia.consumido_kcal+r.kcal}</b> de ${dia.objetivo_kcal} kcal y <b>${dia.consumido_prot+(r.prot||0)}</b> de ${dia.objetivo_prot} g de proteína.</p>`:"";
+  $("ia-card").innerHTML=`<div class="card" style="border-color:var(--acc);margin-top:8px"><h2 style="margin-top:0">Resultado ${esc(fuente)}</h2>
+    <div style="font-size:.9rem">${esc(r.identificado||r.descripcion)}</div>
+    <div style="margin:.5rem 0"><span class="chp ok">${sc} ${esc(r.semaforo||"sin semáforo")}</span><span class="chp">🔥 ${r.kcal===""?"—":r.kcal+" kcal"}</span><span class="chp">💪 ${r.prot===""?"—":r.prot+" g"}</span><span class="chp">Sodio: ${esc(r.sodio||"—")}</span>${r.sr?`<span class="chp">Recetario: ${esc(r.sr)}</span>`:""}</div>
+    ${r.ajuste?`<p style="margin:.4rem 0;font-size:.88rem"><b>Ajuste:</b> ${esc(r.ajuste)}</p>`:""}
+    ${r.pregunta?`<p style="margin:.4rem 0;font-size:.88rem"><b>La IA pregunta:</b> ${esc(r.pregunta)}</p>`:""}
+    ${pie}${(r.avisos||[]).map(x=>`<p style="margin:.3rem 0;font-size:.8rem;color:var(--crit)">⚠ ${esc(x)}</p>`).join("")}
+    <p style="margin:.4rem 0;font-size:.75rem;color:var(--ink2)">Estimación aproximada; no reemplaza a un profesional de la salud.</p>
+    <button class="save" id="ia-acepta" type="button">Aceptar y llenar el registro</button><button class="save sec" id="ia-desc" type="button">Descartar</button></div>`;
+  $("ia-desc").onclick=()=>{$("ia-card").innerHTML="";IAR=null};
+  $("ia-acepta").onclick=()=>{const x=IAR;if(!x)return;
+    if(x.comida)comida=x.comida;
+    if(x.fecha){const h=iso(new Date()),ay=(()=>{const d=new Date();d.setDate(d.getDate()-1);return iso(d)})();fechaSel=x.fecha===h?"hoy":x.fecha===ay?"ayer":"otra";if(fechaSel==="otra"){$("fecha").value=x.fecha;$("fecha").style.display="block"}else $("fecha").style.display="none"}
+    if(x.sr)rec=x.sr;
+    $("desc").value=x.descripcion||x.identificado||"";$("kcal").value=x.kcal===""?"":x.kcal;$("prot").value=x.prot===""?"":x.prot;
+    iaExtra={semaforo:x.semaforo,sodio:x.sodio,ajuste:x.ajuste,notas_ia:x.notas};
+    pintaTodo();$("ia-card").innerHTML="";IAR=null;msg("mc","Registro llenado. Revise y toque «Guardar comida».","ok");$("gc").scrollIntoView({block:"center"})}}
+$("ia-paste").onclick=()=>{$("ia-pegar").style.display=$("ia-pegar").style.display==="none"?"block":"none"};
+$("ia-leer").onclick=()=>{const r=parseRegistro($("ia-txt").value);
+  if(!r){$("ia-card").innerHTML='<div class="msg err">No encontré el bloque REGISTRO_APP … FIN_REGISTRO. Copie la respuesta completa, incluido ese bloque.</div>';return}
+  $("ia-pegar").style.display="none";$("ia-txt").value="";iaMuestra(r,null,"pegado")};
+function iaEstado(){
+  if(rd("sl_ia")==="1")$("ia-go").style.display="block";
+  if(iaChk||!LLAVE)return;iaChk=true;
+  get("salud_resumen").then(r=>{wr("sl_ia",r.ia?"1":"0");$("ia-go").style.display=r.ia?"block":"none"}).catch(()=>{iaChk=false})}
+$("ia-go").onclick=async()=>{const t=$("desc").value.trim();if(!t&&!fotoB64)return msg("mc","Escriba qué comió o suba una foto","err");
+  msg("mc","Analizando…");$("ia-go").disabled=true;
+  try{const f=fechaElegida()||iso(new Date()),r=await post({accion:"salud_analizar",texto:t,foto_b64:fotoB64||undefined,fecha:f,comida:comida||undefined}),x=r.resultado;
+    msg("mc","");iaMuestra({fecha:f,comida:x.comida||comida,identificado:x.identificado,descripcion:x.descripcion||t,kcal:x.kcal_est,prot:x.proteina_g_est,sr:x.siguio_recetario,semaforo:x.semaforo,sodio:x.sodio,ajuste:x.ajuste,notas:"",pregunta:x.pregunta,avisos:[]},r.dia,"de Gemini")}
+  catch(e){msg("mc",e.message,"err")}$("ia-go").disabled=false};
+
 
 /* ===== Gráficas ===== */
 function linea(el,series,opts){
@@ -494,6 +583,8 @@ async function analisis(){
   const h=(Number(D.meta.estatura_cm)||0)/100;
   if(h>0)linea($("ch-imc"),[{pts:pts.map(p=>[di(p.f),p.peso/(h*h),p.f+": IMC "+f1(p.peso/(h*h))]),color:"var(--s1)",puntos:true}],{aria:"IMC en el tiempo",h:150});
   else $("ch-imc").innerHTML='<div class="msg">Falta la estatura en la configuración.</div>';
+  const sc={verde:0,amarillo:0,rojo:0};D.com.filter(x=>di(x.fecha)>=a&&sc[x.semaforo]!==undefined).forEach(x=>sc[x.semaforo]++);const stot=sc.verde+sc.amarillo+sc.rojo;
+  $("ch-sem").innerHTML=stot?`<div style="font-size:1.1rem">🟢 ${sc.verde} &nbsp; 🟡 ${sc.amarillo} &nbsp; 🔴 ${sc.rojo}</div><div class="msg" style="color:var(--ink2)">${stot} comidas evaluadas en el periodo (${Math.round(sc.verde/stot*100)} % en verde).</div>`:'<div class="msg">Aún no hay comidas con semáforo. Use «Analizar con IA» o «Pegar respuesta».</div>';
 }
 
 /* ===== Hallazgos automáticos (se vuelven más útiles con más datos) ===== */
@@ -550,7 +641,7 @@ async function historial(){
       if(Number(x.actividad_min)>0)p.push(esc(x.actividad)+" "+x.actividad_min+" min"+(x.intensidad?" ("+esc(x.intensidad)+")":"")+(x.kcal_gasto!==""?" ≈ "+x.kcal_gasto+" kcal":""));
       if(x.notas)p.push(esc(x.notas));if(!p.length)p.push("Registro");
       return `<div class="hr"><div><b>${esc(x.hora||"")}</b> ${p.join(" · ")}</div><button data-ed="medida" data-id="${esc(x.id)}">Editar</button></div>`}).join("")+
-      o.c.map(x=>`<div class="hr"><div><b>${NOMC[x.comida]||esc(x.comida)}</b>: ${esc(x.descripcion)}${x.kcal_est!==""?" · "+x.kcal_est+" kcal":""}${x.foto_id?" · 📷":""}</div><button data-ed="comida" data-id="${esc(x.id)}">Editar</button></div>`).join("");
+      o.c.map(x=>`<div class="hr"><div><b>${NOMC[x.comida]||esc(x.comida)}</b>${x.semaforo?" "+SEMC[x.semaforo]:""}: ${esc(x.descripcion)}${x.kcal_est!==""?" · "+x.kcal_est+" kcal":""}${x.foto_id?" · 📷":""}</div><button data-ed="comida" data-id="${esc(x.id)}">Editar</button></div>`).join("");
     html.push(`<div class="hd ${lista?"":"vac"}"><h3>${etiquetaDia(n)}${n===hoy?" · hoy":""}</h3>
       <span class="chp ${peso?"ok":""}">${peso?"✓ ":""}Peso</span><span class="chp ${ten?"ok":""}">${ten?"✓ ":""}Tensión</span><span class="chp ${tipos>=3?"ok":""}">${tipos>=3?"✓ ":""}Comidas ${tipos}</span><span class="chp ${act?"ok":""}">${act?"✓ ":""}Actividad</span>
       ${lista||'<div style="font-size:.85rem;color:var(--ink2)">Sin registros este día.</div>'}<button class="hmas" data-add="${f}">＋ Agregar a este día</button></div>`)}
@@ -582,7 +673,7 @@ function abreEdicion(tipo,id){const D=cache;if(!D)return;const x=(tipo==="medida
     if(tipo==="medida"){const a=v("ed-act").toLowerCase(),m=Number(v("ed-min")),it=$("ed-int").value;
       envia({fecha:$("ed-fecha").value,hora:$("ed-hora").value,peso_kg:v("ed-peso"),pulso:v("ed-pul"),presion_sis:v("ed-sis"),presion_dia:v("ed-dia"),actividad:a,actividad_min:a?v("ed-min"):"",intensidad:it,
         kcal_gasto:a&&m>0?kcalEj(a,it||"moderada",m,kgRef()):"",energia_1a5:x.energia_1a5,cintura_cm:x.cintura_cm,pasos:x.pasos,notas:v("ed-not")})}
-    else envia({fecha:$("ed-fecha").value,comida:$("ed-com").value,descripcion:$("ed-desc").value,kcal_est:v("ed-kc"),proteina_g_est:v("ed-pr"),siguio_recetario:$("ed-rec").value})}}
+    else envia({fecha:$("ed-fecha").value,comida:$("ed-com").value,descripcion:$("ed-desc").value,kcal_est:v("ed-kc"),proteina_g_est:v("ed-pr"),siguio_recetario:$("ed-rec").value,semaforo:x.semaforo||"",sodio:x.sodio||"",ajuste:x.ajuste||"",notas_ia:x.notas_ia||""})}}
 /* ===== Semana ===== */
 async function semana(){
   if(!cache)$("kpi").innerHTML=LDR;
@@ -605,7 +696,7 @@ async function semana(){
 try{localStorage.setItem("ocarisa_ult",location.pathname)}catch(e){}
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.t===p));
   document.querySelectorAll(".pg").forEach(x=>x.classList.toggle("on",x.id==="pg-"+p));
-  if(p==="reg"){pintaTodo();prefijaHoras()}if(p==="ana")analisis();if(p==="sem")semana();if(p==="his")historial()}
+  if(p==="reg"){pintaTodo();prefijaHoras();iaEstado()}if(p==="ana")analisis();if(p==="sem")semana();if(p==="his")historial()}
 document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-t]");if(b)irA(b.dataset.t)};
 $("gcfg").onclick=async()=>{
   const url=$("url").value.trim(),llave=$("llave").value.trim(),p1=$("pin1").value,p2=$("pin2").value,m=$("mcfg");m.className="msg err";
@@ -615,7 +706,7 @@ $("gcfg").onclick=async()=>{
     if(!llave){m.textContent="Escriba la llave";return}
     if(!/^\d{6}$/.test(p1)){m.textContent="El PIN debe tener exactamente 6 dígitos";return}
     if(p1!==p2){m.textContent="Los dos PIN no coinciden";return}
-    try{wr(PFX+"_llavec",await sellar(p1,llave));rm(PFX+"_llave");LLAVE=llave}catch(e){m.textContent="No se pudo cifrar la llave";return}
+    try{bioQuitar();wr(PFX+"_llavec",await sellar(p1,llave));rm(PFX+"_llave");LLAVE=llave}catch(e){m.textContent="No se pudo cifrar la llave";return}
   }else if(p1){m.textContent="Para cambiar el PIN escriba también la llave";return}
   wr(PFX+"_url",url);$("llave").value="";$("pin1").value="";$("pin2").value="";m.className="msg ok";m.textContent="Guardado en este teléfono, con la llave cifrada.";cache=null};
 $("ping").onclick=async()=>{const m=$("mcfg");m.className="msg";m.textContent="Probando...";try{const t=performance.now();await get("ping");m.textContent="Conexión correcta ("+Math.round(performance.now()-t)+" ms)";m.className="msg ok"}catch(e){m.textContent=e.message;m.className="msg err"}};
