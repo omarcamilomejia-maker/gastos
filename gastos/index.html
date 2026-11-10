@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-09.1">
+<meta name="app-version" content="2026-11-09.2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -154,6 +154,8 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 .cd{border:0;border-radius:.6rem;background:var(--bg);padding:.2rem 0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
 .cd i{font-style:normal;font-size:.82rem;font-weight:600}.cd small{font-size:.56rem;color:var(--ink2)}.cd.on{outline:2px solid var(--acc)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.65rem;opacity:.95;width:64px;height:22px}
+.dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
 </style>
 </head>
 <body>
@@ -292,7 +294,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-09.1";
+const APP_V="2026-11-09.2";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -543,7 +545,7 @@ function chAcum(rowsA,rowsB,ndias){
   for(let k=0;k<=3;k++){const v2=mx*k/3;s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v2)}" y2="${Y(v2)}" stroke="var(--grid)"/><text x="${L-4}" y="${Y(v2)+3}" text-anchor="end">${cmp(v2)}</text>`}
   [1,Math.round(ndias/2),ndias].forEach((d,i)=>s+=`<text x="${X(d)}" y="${H-6}" text-anchor="${i===0?"start":i===2?"end":"middle"}">día ${d}</text>`);
   const pts=(arr,n)=>Array.from({length:n},(_,i)=>X(i+1)+","+Y(arr[i+1])).join(" ");
-  s+=`<polyline class="ln" pathLength="1" points="${pts(Bc,ndias)}" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/><polyline class="ln" pathLength="1" points="${pts(A,lim)}" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  s+=`<path class="ln" pathLength="1" d="${pd(pts(Bc,ndias))}" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/><path class="ln" pathLength="1" d="${pd(pts(A,lim))}" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
   $("ch-acum").innerHTML=s+"</svg>";
 }
 async function analisis(){
@@ -558,9 +560,11 @@ async function analisis(){
         P=inR(pa,pb,r=>r.t==="G"&&(!grp||r.g===grp)&&(!corteMesActual||r.d<=hoyD.getDate())),
         I=inR(a,b,r=>r.t==="I"),gt=sum(G),pt=sum(P),it=sum(I);
   const diasTrans=(()=>{const ini=new Date(Math.floor((a-1)/12),(a-1)%12,1),fin=new Date(Math.floor((b-1)/12),(b-1)%12+1,0),lim=fin<hoyD?fin:hoyD;return Math.max(1,Math.round((lim-ini)/864e5)+1)})();
-  $("akpi").innerHTML=`<div><small>Gasto</small><b>${fmt(gt)}</b><span class="d">${pt?deltaTxt(gt,pt,true)+" "+(corteMesActual?"vs mismo corte del mes anterior":"vs periodo anterior"):"Sin periodo anterior"}</span></div>
-   <div><small>Promedio diario</small><b>${fmt(gt/diasTrans)}</b><span class="d">${G.length} movimientos</span></div>
-   <div><small>Ingreso</small><b>${it?fmt(it):"—"}</b><span class="d">${it?"Flujo "+fmt(it-sum(inR(a,b,r=>r.t==="G"))):"Sin ingresos registrados"}</span></div>
+  const serieM=ty=>{const o=[];for(let m=cur-11;m<=cur;m++)o.push(sum(MOV.filter(r=>r.t===ty&&r.mi===m&&(ty==="I"||!grp||r.g===grp))));return o},
+    serieD=Array.from({length:14},(_,i)=>{const d=new Date(hoyD);d.setDate(d.getDate()-13+i);const f=iso(d);return sum(MOV.filter(r=>r.t==="G"&&r.f===f&&(!grp||r.g===grp)))});
+  $("akpi").innerHTML=`<div><small>Gasto</small><b>${fmt(gt)}</b>${spark(serieM("G"))}<span class="d">${pt?deltaTxt(gt,pt,true)+" "+(corteMesActual?"vs mismo corte del mes anterior":"vs periodo anterior"):"Sin periodo anterior"}</span></div>
+   <div><small>Promedio diario</small><b>${fmt(gt/diasTrans)}</b>${spark(serieD,"var(--s2)")}<span class="d">${G.length} movimientos</span></div>
+   <div><small>Ingreso</small><b>${it?fmt(it):"—"}</b>${spark(serieM("I"),"#2e9b6a")}<span class="d">${it?"Flujo "+fmt(it-sum(inR(a,b,r=>r.t==="G"))):"Sin ingresos registrados"}</span></div>
    <div><small>Periodo anterior</small><b>${fmt(pt)}</b><span class="d">${corteMesActual?"hasta el día "+hoyD.getDate():labM(pa)+(len>1?" – "+labM(pb):"")}</span></div>`;
   chMes(a,b,grp);
   $("c-acum").style.display=unMes?"block":"none";
@@ -572,7 +576,7 @@ async function analisis(){
     const [g,c]=x.k.split("|"),t=tope[x.k]?tope[x.k]*len:0,over=t&&x.v>t;
     return {n:(c==="Otros"?g+" · Otros":c),v:x.v,over:over,txt:cmp(x.v)+(x.p?" "+deltaTxt(x.v,x.p,true):"")+(over?' <span class="up">▲ tope</span>':"")}});
   $("cat-h").textContent="Con la variación frente al periodo anterior"+(PRES.length?" y aviso si pasó el tope":"")+".";
-  $("ch-cat").innerHTML=barsH(items,gt);
+  $("ch-cat").innerHTML=dona(items,gt)+barsH(items,gt);
   $("ch-grp").innerHTML=barsH(Object.entries(agrupa(G,r=>r.g)).sort((x,y)=>y[1].v-x[1].v).map(([n,o])=>({n:n,v:o.v})),gt);
   const dow=Array(7).fill(0);G.forEach(r=>dow[r.dow]+=r.v);const N=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],mxd=Math.max.apply(null,dow.concat([1]));
   $("ch-dia").innerHTML=`<svg viewBox="0 0 300 130" role="img" aria-label="Gasto por día de la semana">`+dow.map((x,i)=>{const h=100*x/mxd,cx=21+i*43;return `<rect data-b="1" x="${cx-14}" y="${108-h}" width="28" height="${h}" rx="3" fill="${x===mxd&&x>0?"var(--s1)":"var(--s2)"}"><title>${N[i]}: ${fmt(x)}</title></rect><text x="${cx}" y="124" text-anchor="middle">${N[i]}</text>`}).join("")+"</svg>";
@@ -681,12 +685,13 @@ function filtraHis(usaPeriodo){
   const r=rangoH($("hper").value),q=norm($("hq").value).split(/\s+/).filter(Boolean),t=$("ht").value,a=$("hact").value,ca=$("hcat").value,an=$("han").checked;
   return HIS.filter(m=>(!usaPeriodo||hDia||(m.f>=r[0]&&m.f<=r[1]))&&(!usaPeriodo||!hDia||m.f===hDia)&&(!t||m.t===t)&&(an||m.e!=="anulado")&&(!a||(a==="__ninguno"?!m.act:m.act===a))&&(!ca||(m.g+"|"+m.c)===ca)&&
     (!q.length||q.every(w=>norm([m.c,m.g,m.com,m.nota,m.tg,actNombre(m.act)].join(" ")).indexOf(w)>=0)))}
-const kp=(a,b,c)=>`<div><small>${a}</small><b>${b}</b><span class="d">${c}</span></div>`;
+const kp=(a,b,c,s)=>`<div><small>${a}</small><b>${b}</b><span class="d">${c}</span>${s||""}</div>`;
 function pintaHis(){
   const r=rangoH($("hper").value),L=filtraHis(true).sort((x,y)=>x.f<y.f?1:x.f>y.f?-1:0),ok=L.filter(m=>m.e!=="anulado"),G=ok.filter(m=>m.t==="G"),I=ok.filter(m=>m.t==="I");
   const min=ok.length?ok.reduce((s,m)=>m.f<s?m.f:s,"9999"):r[1],ini=r[0]>min?r[0]:min,dias=Math.max(1,Math.round((new Date(r[1]+"T12:00:00")-new Date(ini+"T12:00:00"))/864e5)+1);
   const tg=sum(G),ti=sum(I),chicos=G.filter(m=>m.v<UMB),gs=sum(chicos),big=G.length-chicos.length;
-  $("hkpi").innerHTML=kp("Gastos",fmt(tg),G.length+" mov.")+kp("Ingresos",fmt(ti),I.length+" mov.")+kp("Gasto diario",fmt(tg/dias),"sin únicos: "+fmt(gs/dias))+kp("Gasto semanal",fmt(tg/dias*7),"sin únicos: "+fmt(gs/dias*7))+
+    const dser=arr=>{const mp={};arr.forEach(m=>mp[m.f]=(mp[m.f]||0)+m.v);const o=[],e=new Date(r[1]+"T12:00:00");for(let i=Math.min(dias,30)-1;i>=0;i--){const d=new Date(e);d.setDate(d.getDate()-i);o.push(mp[iso(d)]||0)}return o};
+  $("hkpi").innerHTML=kp("Gastos",fmt(tg),G.length+" mov.",spark(dser(G)))+kp("Ingresos",fmt(ti),I.length+" mov.",spark(dser(I),"#2e9b6a"))+kp("Gasto diario",fmt(tg/dias),"sin únicos: "+fmt(gs/dias))+kp("Gasto semanal",fmt(tg/dias*7),"sin únicos: "+fmt(gs/dias*7))+
     kp("Ingreso diario",fmt(ti/dias),dias+" días")+kp("Ingreso semanal",fmt(ti/dias*7),"Neto: "+fmt(ti-tg));
   $("hflujo").innerHTML=barsH([{n:"Ingresos",v:ti,txt:fmt(ti)},{n:"Gastos",v:tg,txt:fmt(tg),over:ti>0&&tg>ti}],0)+`<p class="hint" style="margin:.4rem 0 0">${ti?(ti>=tg?"Gastó menos de lo que ganó: quedan "+fmt(ti-tg)+" ("+Math.round((ti-tg)/ti*100)+" % de los ingresos).":"Gastó más de lo que ganó: faltaron "+fmt(tg-ti)+"."):"Sin ingresos en este filtro."}</p>`;pintaCal();
   $("hnota").textContent=big?big+" gasto(s) de "+fmt(UMB)+" o más se excluyen de «sin únicos».":"";
@@ -933,6 +938,17 @@ function presupuestoMes(cur){
     return `<div class="row"><span class="n">${esc(x.c)}</span><span class="track"><span class="fill ${q>1?"over":""}" style="width:${Math.min(q,1)*100}%"></span></span><span class="num">${cmp(x.v)} de ${cmp(x.t)}</span></div>`}).join("");
   $("ch-pres").innerHTML=`<div style="display:flex;gap:14px;align-items:center">${anillo(p,{txt:Math.round(p*100)+"%",sub:"de los topes",aria:"Presupuesto usado en el mes"})}<div style="font-size:.9rem"><b>${fmt(ts)}</b> de ${fmt(tt)}<br><span class="hint" style="margin:0">Quedan ${fmt(Math.max(tt-ts,0))} en las categorías con tope.</span></div></div><div style="margin-top:8px">${rows}</div>`}
 
+
+const pd=s=>"M"+s.split(" ").join(" L");
+function spark(v,color){if(!v||v.length<2)return "";const mx=Math.max.apply(null,v.concat([1])),mn=Math.min.apply(null,v.concat([0])),W=64,H=22,X=i=>i*(W-2)/(v.length-1)+1,Y=x=>H-2-(x-mn)/(mx-mn||1)*(H-4),c=color||"var(--s1)";
+  const pts=v.map((x,i)=>X(i).toFixed(1)+","+Y(x).toFixed(1)).join(" ");
+  return `<svg class="spk" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><path class="ln" pathLength="1" d="${pd(pts)}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${X(v.length-1).toFixed(1)}" cy="${Y(v[v.length-1]).toFixed(1)}" r="2" fill="${c}"/></svg>`}const PAL=["#2b5282","#e08a2c","#2e9b6a","#8b5cc2","#d1495b","#8d99ae"];
+function dona(items,total){
+  if(!items.length||!total)return "";
+  const top=items.slice(0,5),resto=total-top.reduce((s,x)=>s+x.v,0),seg=top.map(x=>({n:x.n,v:x.v}));if(resto>total*.005)seg.push({n:"Otras",v:resto});
+  const r=38,c=2*Math.PI*r;let off=0;
+  const arcs=seg.map((x,i)=>{const l=x.v/total*c,s=`<circle class="dnt" cx="50" cy="50" r="${r}" fill="none" stroke="${PAL[i%6]}" stroke-width="14" stroke-dasharray="${l} ${c-l}" stroke-dashoffset="${-off}" transform="rotate(-90 50 50)" style="--l:${l};--r:${c-l};animation-delay:${i*.08}s"><title>${esc(x.n)}: ${fmt(x.v)}</title></circle>`;off+=l;return s}).join("");
+  return `<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px"><svg viewBox="0 0 100 100" style="width:130px;height:130px;flex:none" role="img" aria-label="Composición del gasto por categoría"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--grid)" stroke-width="14"/>${arcs}<text x="50" y="48" text-anchor="middle" font-size="9" fill="var(--ink2)">Total</text><text x="50" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">${cmp(total)}</text></svg><div style="font-size:.8rem;flex:1;min-width:0">${seg.map((x,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:.12rem 0"><i style="width:10px;height:10px;border-radius:3px;background:${PAL[i%6]};flex:none"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.n)}</span><b style="font-weight:600">${Math.round(x.v/total*100)}%</b></div>`).join("")}</div></div>`}
 
 /* ---- navegación y configuración ---- */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
