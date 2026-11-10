@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-09.1">
+<meta name="app-version" content="2026-11-09.2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -143,6 +143,8 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 .cd{border:0;border-radius:.6rem;background:var(--bg);padding:.2rem 0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
 .cd i{font-style:normal;font-size:.82rem;font-weight:600}.cd small{font-size:.56rem;color:var(--ink2)}.cd.on{outline:2px solid var(--acc)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.65rem;opacity:.95;width:64px;height:22px}
+.dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
 </style>
 </head>
 <body>
@@ -285,7 +287,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-09.1";
+const APP_V="2026-11-09.2";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -524,7 +526,7 @@ function linea(el,series,opts){
   const dd=n=>{const d=new Date(n*864e5);return d.getUTCDate()+"/"+(d.getUTCMonth()+1)};
   [x0,(x0+x1)/2,x1].forEach((x,i)=>{s+=`<text x="${X(x)}" y="${H-6}" text-anchor="${i===0?"start":i===2?"end":"middle"}">${dd(Math.round(x))}</text>`});
   series.forEach(se=>{
-    if(se.pts.length>1&&!se.soloPuntos)s+=`<polyline ${se.dash?"":'class="ln" pathLength="1"'} points="${se.pts.map(p=>X(p[0])+","+Y(p[1])).join(" ")}" fill="none" stroke="${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${se.dash?'stroke-dasharray="5 4"':""}/>`;
+    if(se.pts.length>1&&!se.soloPuntos)s+=`<path ${se.dash?"":'class="ln" pathLength="1"'} d="${pd(se.pts.map(p=>X(p[0])+","+Y(p[1])).join(" "))}" fill="none" stroke="${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${se.dash?'stroke-dasharray="5 4"':""}/>`;
     if(se.puntos)se.pts.forEach(p=>{s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3.2" fill="${se.color}" stroke="var(--surface)" stroke-width="1.5"><title>${p[2]||""}</title></circle>`})});
   el.innerHTML=s+"</svg>"}
 function barras(el,items,opts){ // items: [{l,segs:[[valor,color,nombre]]}]
@@ -742,13 +744,17 @@ function pintaMetas(D){
     return `<div class="row" style="padding:.25rem 0"><span>Últimos ${d} días</span><b>${v===null?"—":(v>0?"▲ ":v<0?"▼ ":"")+f1(Math.abs(v))+" kg"}</b></div>`}).join("")+'<p class="msg" style="color:var(--ink2)">Cambio del promedio móvil de 7 días, para suavizar el ruido diario.</p>':""}
 
 
+const pd=s=>"M"+s.split(" ").join(" L");
+function spark(v,color){if(!v||v.length<2)return "";const mx=Math.max.apply(null,v.concat([1])),mn=Math.min.apply(null,v.concat([0])),W=64,H=22,X=i=>i*(W-2)/(v.length-1)+1,Y=x=>H-2-(x-mn)/(mx-mn||1)*(H-4),c=color||"var(--s1)";
+  const pts=v.map((x,i)=>X(i).toFixed(1)+","+Y(x).toFixed(1)).join(" ");
+  return `<svg class="spk" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><path class="ln" pathLength="1" d="${pd(pts)}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${X(v.length-1).toFixed(1)}" cy="${Y(v[v.length-1]).toFixed(1)}" r="2" fill="${c}"/></svg>`}
 /* ===== Semana ===== */
 async function semana(){
   if(!cache)$("kpi").innerHTML=LDR;
   try{const D=await datos(),r=D.res,m=r.meta;
-    $("kpi").innerHTML=`<div><small>Último peso</small><b>${f1(r.ultimo_peso)} kg</b></div><div><small>Promedio 7 días</small><b>${f1(r.promedio_movil_7d)} kg</b></div>
+    const sp=(r.serie_peso||[]).slice(-30),hm=(Number(m.estatura_cm)||0)/100;$("kpi").innerHTML=`<div><small>Último peso</small><b>${f1(r.ultimo_peso)} kg</b>${spark(sp.map(p=>p.peso))}</div><div><small>Promedio 7 días</small><b>${f1(r.promedio_movil_7d)} kg</b>${spark(sp.map(p=>p.mm7),"var(--s2)")}</div>
      <div><small>Bajados</small><b>${f1(r.kg_bajados)} kg</b></div><div><small>Faltan</small><b>${f1(r.kg_faltan)} kg</b></div>
-     <div><small>Ritmo semanal</small><b>${f1(r.ritmo_semanal_kg)} kg</b></div><div><small>IMC</small><b>${f1(r.imc)}</b></div>`;
+     <div><small>Ritmo semanal</small><b>${f1(r.ritmo_semanal_kg)} kg</b></div><div><small>IMC</small><b>${f1(r.imc)}</b>${spark(hm?sp.map(p=>p.peso/(hm*hm)):[],"var(--s3)")}</div>`;
     const tot=m.peso_inicial-m.meta_kg,pct=tot>0?Math.max(0,Math.min(100,r.kg_bajados/tot*100)):0;
     $("meta").innerHTML=`<div class="bar"><i style="width:${pct}%"></i></div><div class="row"><span>${m.peso_inicial} kg</span><span>${Math.round(pct)}% del camino</span><span>${m.meta_kg} kg</span></div>`;
     const prs=r.presion_prom_7d,act=r.dias_actividad_7d!==undefined?r.dias_actividad_7d:r.dias_spinning_7d,bar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
