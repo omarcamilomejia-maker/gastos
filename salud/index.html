@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-12.2">
+<meta name="app-version" content="2026-11-14.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -146,6 +146,8 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 .kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}.cap{font-size:.72rem;color:var(--ink2);text-align:center;margin-top:-2px}
 .dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
 .rseg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--key);padding:4px;border-radius:.95rem;margin-bottom:10px}.rseg button{border:0;background:none;padding:.6rem .1rem;border-radius:.75rem;font-size:.8rem;color:var(--ink2)}.rseg button.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh)}
+#net{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--warn-t);color:var(--warn);text-align:center;font-size:.78rem;font-weight:600;padding:calc(.3rem + env(safe-area-inset-top)) .5rem .3rem;display:none;cursor:pointer}body.net-on{padding-top:calc(1.9rem + env(safe-area-inset-top))}
+
 </style>
 </head>
 <body>
@@ -163,6 +165,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
   <div class="sp-pasos" id="sp-pasos" aria-hidden="true"></div>
   <button class="sp-enter" id="enter" type="button">Ingresar</button>
 </div>
+<div id="net" role="status" aria-live="polite"></div>
 <div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="save sec" id="bio" type="button" style="display:none;width:auto;padding:.7rem 1.6rem;margin:0">Usar huella</button><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
 
 <div class="wrap">
@@ -289,7 +292,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-12.2";
+const APP_V="2026-11-14.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -355,7 +358,7 @@ async function lockProcesa(){
   else{if(pinBuf!==pinPrimero){lmsg("No coinciden. Intente de nuevo.");modoLock="crear";pinBuf="";pintaLock();return}
     const vieja=rd(PFX+"_llave");try{wr(PFX+"_llavec",await sellar(pinBuf,vieja));rm(PFX+"_llave");LLAVE=vieja;desbloquear()}catch(e){lmsg("No se pudo guardar el PIN")}}
 }
-function desbloquear(){$("lock").style.display="none";lmsg("");pinBuf="";ultimoUso=Date.now();irA("reg")}
+function desbloquear(){$("lock").style.display="none";lmsg("");pinBuf="";ultimoUso=Date.now();irA("reg");setTimeout(()=>{vaciaColaS().catch(()=>{})},400)}
 function bloquear(){LLAVE="";cache=null;lockMostrar("entrar")}
 $("forgot").onclick=()=>{if(confirm("Se borrará la llave guardada en este teléfono y tendrá que escribirla de nuevo. ¿Continuar?")){bioQuitar();rm(PFX+"_llavec");rm(PFX+"_llave");LLAVE="";$("lock").style.display="none";irA("cfg")}};
 ["click","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,()=>{ultimoUso=Date.now()},{passive:true}));
@@ -398,7 +401,7 @@ bioLbl();
 const cfg=()=>({url:rd(PFX+"_url").trim(),llave:LLAVE});
 async function post(o){const c=cfg();if(!c.url||!c.llave)throw new Error("Desbloquee la app o configure la conexión");
   const r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({llave:c.llave},o))});
-  const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||("Error: "+j.error));return j}
+  const j=await r.json();if(!j.ok)throw Object.assign(new Error(ERR[j.error]||("Error: "+j.error)),{api:true});return j}
 async function get(a,extra){const c=cfg();if(!c.url||!c.llave)throw new Error("Desbloquee la app o configure la conexión");
   const r=await fetch(c.url+"?accion="+a+(extra||"")+"&llave="+encodeURIComponent(c.llave));
   const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||("Error: "+j.error));return j}
@@ -431,7 +434,7 @@ $("amin").oninput=kcPrev;
 async function guardaMed(boton,mid,obj,limpiar){
   const f=fechaElegida();if(!f)return msg(mid,"Elija la fecha","err");
   msg(mid,"Guardando...");$(boton).disabled=true;
-  try{await post(Object.assign({accion:"salud_medida",id:nuevoId("sm"),fecha:f},obj));msg(mid,"Guardado ✓ ("+f+")","ok");sonidoGuardado();if(obj.peso_kg)wr(PFX+"_kg",String(obj.peso_kg));limpiar();cache=null;setTimeout(pintaHoy,600)}
+  try{const rq=await enviaOCola(Object.assign({accion:"salud_medida",id:nuevoId("sm"),fecha:f},obj));msg(mid,rq.cola?"Sin conexión: quedó en cola ("+colaS().length+"). Se envía al abrir con señal.":"Guardado ✓ ("+f+")","ok");sonidoGuardado();if(obj.peso_kg)wr(PFX+"_kg",String(obj.peso_kg));limpiar();cache=null;setTimeout(pintaHoy,600)}
   catch(e){msg(mid,e.message,"err")}$(boton).disabled=false}
 $("g-peso").onclick=()=>guardaMed("g-peso","m-peso",{peso_kg:num("peso"),hora:horaDe("hpeso"),energia_1a5:ENE.peso?Number(ENE.peso):undefined},()=>{$("peso").value="";ENE.peso="";pintaTodo()});
 $("g-act").onclick=()=>{const nombre=act==="otra"?$("otra").value.trim():act;if(!nombre)return msg("m-act","Elija la actividad","err");
@@ -450,7 +453,7 @@ $("gc").onclick=async()=>{
   const o={accion:"salud_comida",id:nuevoId("sc"),fecha:f,comida:comida,descripcion:$("desc").value,siguio_recetario:rec||undefined};const kc=num("kcal"),pt=num("prot");if(kc>0)o.kcal_est=kc;if(pt>0)o.proteina_g_est=pt;if(iaExtra.semaforo)o.semaforo=iaExtra.semaforo;if(iaExtra.sodio)o.sodio=iaExtra.sodio;if(iaExtra.ajuste)o.ajuste=iaExtra.ajuste;if(iaExtra.notas_ia)o.notas_ia=iaExtra.notas_ia;
   if(fotoB64)o.foto_b64=fotoB64;
   msg("mc","Guardando...");$("gc").disabled=true;
-  try{await post(o);msg("mc","Guardado ✓"+(fotoB64?" con foto":"")+" ("+f+")","ok");sonidoGuardado();$("desc").value="";$("kcal").value="";$("prot").value="";$("est-m").textContent="";iaExtra={semaforo:"",sodio:"",ajuste:"",notas_ia:""};$("ia-card").innerHTML="";comida="";rec="";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";pintaTodo();cache=null;setTimeout(pintaHoy,600)}
+  try{const rq=await enviaOCola(o);msg("mc",rq.cola?"Sin conexión: quedó en cola ("+colaS().length+"). Se envía al abrir con señal.":"Guardado ✓"+(fotoB64?" con foto":"")+" ("+f+")","ok");sonidoGuardado();$("desc").value="";$("kcal").value="";$("prot").value="";$("est-m").textContent="";iaExtra={semaforo:"",sodio:"",ajuste:"",notas_ia:""};$("ia-card").innerHTML="";comida="";rec="";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";pintaTodo();cache=null;setTimeout(pintaHoy,600)}
   catch(e){msg("mc",e.message,"err")}$("gc").disabled=false};
 
 /* Estimador aproximado de calorías: palabras clave -> [kcal, proteína g] por porción típica. Editable por la persona usuaria. */
@@ -770,6 +773,23 @@ async function semana(){
      <div class="row"><span>Kcal promedio (estimadas por el asesor)</span><b>${r.kcal_prom_7d===null?"—":r.kcal_prom_7d+" de "+m.kcal_objetivo}</b></div>`;pintaMetas(D);
   }catch(e){$("kpi").innerHTML='<div class="msg err">'+e.message+"</div>"}
 }
+
+/* ---- Cola sin conexión (como en Gastos), estado de conexión y modo sin internet ---- */
+const colaS=()=>{try{return JSON.parse(rd("sl_cola")||"[]")}catch(e){return[]}};
+const guardaColaS=a=>wr("sl_cola",JSON.stringify(a));
+async function enviaOCola(o){try{await post(o);return{cola:false}}catch(e){if(e.api||!/fetch|network|load failed/i.test(String(e.message)))throw e;
+  const q=colaS();q.push(o);if(!guardaColaS(q))throw new Error("Sin conexión y no hay espacio para guardarlo en el teléfono (la foto es muy grande)");netEst();return{cola:true}}}
+async function vaciaColaS(){const q=colaS();if(!q.length||!LLAVE)return 0;const resto=[];let n=0;
+  for(const o of q){try{await post(o);n++}catch(e){if(e.api&&e.message.indexOf("Ocupado")<0)continue;resto.push(o)}}
+  guardaColaS(resto);if(n)cache=null;netEst();return n}
+function netEst(){const off=!navigator.onLine,n=colaS().length,b=$("net");b.style.display=(off||n)?"block":"none";
+  b.textContent=(off?"Sin conexión":"Con conexión")+(n?" · "+n+" pendiente"+(n>1?"s":"")+" de enviar":"")+(off?" · puede seguir registrando":"")+(!off&&n?" · toque para enviar":"");document.body.classList.toggle("net-on",off||n>0)}
+$("net").onclick=()=>{if(navigator.onLine&&LLAVE)vaciaColaS().catch(()=>{})};
+window.addEventListener("offline",netEst);
+window.addEventListener("online",()=>{vaciaColaS().catch(()=>{});netEst()});
+setInterval(()=>{if(navigator.onLine&&LLAVE&&colaS().length)vaciaColaS().catch(()=>{})},60000);
+netEst();
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
 /* ===== Navegación y configuración ===== */
 try{localStorage.setItem("ocarisa_ult",location.pathname)}catch(e){}
