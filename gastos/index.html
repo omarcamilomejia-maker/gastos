@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-09.2">
+<meta name="app-version" content="2026-11-12.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -154,7 +154,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 .cd{border:0;border-radius:.6rem;background:var(--bg);padding:.2rem 0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
 .cd i{font-style:normal;font-size:.82rem;font-weight:600}.cd small{font-size:.56rem;color:var(--ink2)}.cd.on{outline:2px solid var(--acc)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
-.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.65rem;opacity:.95;width:64px;height:22px}
+.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}
 .dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
 </style>
 </head>
@@ -180,13 +180,13 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
   <div class="amt"><small>Valor</small><b id="amt">$ 0</b></div>
   <div class="keys" id="keys"></div>
   <div class="lbl">Categoría <button id="todas" type="button">Ver todas</button></div>
-  <div class="chips" id="cats"></div>
+  <input id="catq" type="search" placeholder="Buscar categoría…" autocomplete="off" aria-label="Buscar categoría" style="margin-bottom:6px"><div class="chips" id="cats"></div>
   <select id="sel" style="display:none" aria-label="Todas las categorías"></select>
   <div id="nuevaCat" class="card" style="display:none">
     <h2>Nueva categoría</h2>
     <label class="lbl" for="nc-g">Grupo</label><select id="nc-g"></select>
     <input id="nc-gn" maxlength="40" placeholder="Nombre del grupo nuevo (ej: Eventos)" style="display:none;margin-top:6px">
-    <label class="lbl" for="nc-c" style="margin-top:8px;display:block">Categoría</label><input id="nc-c" maxlength="40" placeholder="Ej: Cumpleaños, Eventos oficina" autocomplete="off">
+    <label class="lbl" for="nc-c" style="margin-top:8px;display:block">Categoría</label><input id="nc-c" maxlength="40" placeholder="Ej: Cumpleaños, Eventos oficina" autocomplete="off"><div id="nc-sim"></div>
     <label class="lbl" for="nc-t" style="margin-top:8px;display:block">Tope mensual (opcional)</label><input id="nc-t" type="number" inputmode="numeric" placeholder="0">
     <div style="display:flex;gap:8px;margin-top:10px"><button class="save sec" id="nc-x" type="button" style="flex:1">Cancelar</button><button class="save" id="nc-ok" type="button" style="flex:2">Crear y usar</button></div>
     <div class="msg" id="nc-m"></div>
@@ -231,7 +231,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 <section class="pg" id="pg-act">
   <div class="card"><h2>Próximos vencimientos</h2><div class="list" id="vlist"></div><button class="save sec" id="vnew" type="button" style="margin-top:8px">＋ Agregar vencimiento</button></div>
   <div class="card"><h2>Mis activos</h2><div class="list" id="alist"></div><button class="save sec" id="anew" type="button" style="margin-top:8px">＋ Agregar activo</button></div>
-  <div class="card"><h2>Costo por activo</h2><div class="fil"><div><label for="ra">Activo</label><select id="ra"></select></div><div><label for="ry">Año</label><select id="ry"></select></div></div><div id="rbody" style="margin-top:8px"></div></div>
+  <div class="card" id="c-rep"><h2>Costo por activo</h2><div class="fil"><div><label for="ra">Activo</label><select id="ra"></select></div><div><label for="ry">Año</label><select id="ry"></select></div></div><div id="rbody" style="margin-top:8px"></div></div>
   <div class="card"><h2>Reporte por etiqueta</h2><label class="lbl" for="rt" style="margin-bottom:4px">Etiqueta</label><select id="rt"></select><div id="rtbody" style="margin-top:8px"></div></div>
   <div class="card"><h2>Recordatorios</h2><label class="lbl" style="justify-content:flex-start;gap:8px"><input type="checkbox" id="acorreo" style="width:auto"> Recordatorios por correo (apagado por defecto)</label><p class="hint" style="margin-top:6px">Los avisos dentro de la app siempre funcionan. El correo necesita autorizar un permiso una sola vez en el script; se activa cuando usted lo decida.</p><div class="msg" id="amsg2"></div></div>
 </section>
@@ -294,7 +294,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-09.2";
+const APP_V="2026-11-12.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -426,8 +426,8 @@ async function cargaCatalogo(){
 function pintaCats(){
   if(!catalogo){$("cats").innerHTML='<div class="msg err" style="grid-column:1/-1">Configure la conexión para cargar las categorías.</div>';return}
   const esIng=tipo==="Ingreso";
-  const lista=esIng?catalogo.categorias.filter(x=>x.g==="Ingreso"):catalogo.frecuentes;
-  $("cats").innerHTML=lista.map(x=>`<button type="button" class="chip ${sel&&sel.g===x.g&&sel.c===x.c?"on":""}" data-g="${esc(x.g)}" data-c="${esc(x.c)}">${ico(x.g,x.c)} ${x.c==="Otros"?esc(x.g)+" · Otros":esc(x.c)}</button>`).join("");
+  const q=norm($("catq").value.trim()),base=esIng?catalogo.categorias.filter(x=>x.g==="Ingreso"):catalogo.categorias.filter(x=>x.g!=="Ingreso"),lista=q?base.filter(x=>norm(x.g+" "+x.c).indexOf(q)>=0):(esIng?base:catalogo.frecuentes);
+  $("cats").innerHTML=(q&&!lista.length?`<button type="button" class="chip" data-new="1" style="grid-column:1/-1">➕ No encontré «${esc($("catq").value.trim())}». Crear categoría</button>`:"")+lista.map(x=>`<button type="button" class="chip ${sel&&sel.g===x.g&&sel.c===x.c?"on":""}" data-g="${esc(x.g)}" data-c="${esc(x.c)}">${ico(x.g,x.c)} ${x.c==="Otros"?esc(x.g)+" · Otros":esc(x.c)}</button>`).join("");
   const grupos={};catalogo.categorias.filter(x=>esIng?x.g==="Ingreso":x.g!=="Ingreso").forEach(x=>(grupos[x.g]=grupos[x.g]||[]).push(x));
   $("sel").innerHTML='<option value="">Todas las categorías…</option><option value="__nueva__">➕ Nueva categoría…</option>'+Object.keys(grupos).map(g=>`<optgroup label="${esc(g)}">`+grupos[g].map(x=>`<option value="${esc(g)}|${esc(x.c)}">${esc(x.c)}</option>`).join("")+"</optgroup>").join("");
 }
@@ -484,7 +484,7 @@ $("save").onclick=async()=>{
   }
   $("save").disabled=false;
 };
-function limpia(){actSel="";$("tags").value="";pintaActivosReg();v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";$("com").value="";$("desc").value="";pintaCats();pintaBtns()}
+function limpia(){$("catq").value="";actSel="";$("tags").value="";pintaActivosReg();v="0";sel=null;medio="";fechaSel="hoy";fotoB64="";$("foto").value="";$("fotoG").value="";$("prev").style.display="none";$("com").value="";$("desc").value="";pintaCats();pintaBtns()}
 
 /* ---- Hoy ---- */
 async function hoy(){banVen();
@@ -624,6 +624,7 @@ function abreNuevaCat(){if(!catalogo){msg("Conecte la app primero",1);return}
 $("nc-g").onchange=()=>{$("nc-gn").style.display=$("nc-g").value==="__nuevo__"?"block":"none"};
 $("nc-x").onclick=()=>{$("nuevaCat").style.display="none"};
 $("nc-ok").onclick=async()=>{const g=$("nc-g").value==="__nuevo__"?$("nc-gn").value.trim():$("nc-g").value,c=$("nc-c").value.trim(),m=$("nc-m");
+  const ex=c&&catalogo.categorias.find(x=>norm(x.c)===norm(c));if(ex){sel={g:ex.g,c:ex.c};$("nuevaCat").style.display="none";$("catq").value="";pintaCats();msg("Ya existía: se usó «"+ex.c+"» ("+ex.g+")",2);return}
   if(!g||!c){m.textContent="Escriba el grupo y la categoría";m.className="msg err";return}
   m.textContent="Creando...";m.className="msg";$("nc-ok").disabled=true;
   try{const t=$("nc-t").value.trim(),r=await post({accion:"categoria",grupo:g,categoria:c,tope:t===""?undefined:Number(t)});
@@ -750,7 +751,7 @@ function pintaVen(){const l=ACT.vencimientos.filter(x=>x.estado==="vigente").sor
     return `<div class="item"><div><span style="font-weight:650">${esc(x.tipo)}</span> · ${esc(actNombre(x.activo_id))} ${est}<br><small>${x.fecha}${x.entidad?" · "+esc(x.entidad):""}${x.poliza?" · póliza "+esc(x.poliza):""}${x.valor!==""?" · aprox. "+fmt(x.valor):""}${x.avisar?" · 🔔":""}</small></div><div style="text-align:right"><button type="button" class="mini" data-vp="${esc(x.id)}">Pagar</button> <button type="button" class="mini" data-ve="${esc(x.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay vencimientos. Agregue el SOAT, el seguro o el impuesto de cada activo.</div>"}
 function pintaAct(){const y=String(new Date().getFullYear()),G=(HIS||[]).filter(m=>m.t==="G"&&m.e!=="anulado"&&m.act);
   $("alist").innerHTML=ACT.activos.map(a=>{const g=G.filter(m=>m.act===a.id);return `<div class="item"><div><span style="font-weight:650">${esc(a.nombre)}</span>${a.activo?"":" <span class='pill'>inactivo</span>"}<br><small>${esc(a.tipo)}${a.identificador?" · "+esc(a.identificador):""}</small></div><div style="text-align:right"><b>${fmt(sum(g.filter(m=>m.f.slice(0,4)===y)))}</b><br><small>este año · total ${cmp(sum(g))}</small><br><button type="button" class="mini" data-ao="${esc(a.id)}">Abrir</button> <button type="button" class="mini" data-ae="${esc(a.id)}">Editar</button></div></div>`}).join("")||"<div class='item'>Aún no hay activos. Agregue sus vehículos, predios u otros.</div>"}
-function pintaRep(){
+function pintaRep(){$("c-rep").style.display=ACT.activos.length?"":"none";
   const ra=$("ra"),ry=$("ry"),pa=ra.value,py=ry.value;
   ra.innerHTML='<option value="">Todos los activos</option>'+ACT.activos.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join("");ra.value=pa;
   const base=(HIS||[]).filter(m=>m.t==="G"&&m.e!=="anulado"&&(ra.value?m.act===ra.value:!!m.act));
@@ -949,6 +950,17 @@ function dona(items,total){
   const r=38,c=2*Math.PI*r;let off=0;
   const arcs=seg.map((x,i)=>{const l=x.v/total*c,s=`<circle class="dnt" cx="50" cy="50" r="${r}" fill="none" stroke="${PAL[i%6]}" stroke-width="14" stroke-dasharray="${l} ${c-l}" stroke-dashoffset="${-off}" transform="rotate(-90 50 50)" style="--l:${l};--r:${c-l};animation-delay:${i*.08}s"><title>${esc(x.n)}: ${fmt(x.v)}</title></circle>`;off+=l;return s}).join("");
   return `<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px"><svg viewBox="0 0 100 100" style="width:130px;height:130px;flex:none" role="img" aria-label="Composición del gasto por categoría"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--grid)" stroke-width="14"/>${arcs}<text x="50" y="48" text-anchor="middle" font-size="9" fill="var(--ink2)">Total</text><text x="50" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">${cmp(total)}</text></svg><div style="font-size:.8rem;flex:1;min-width:0">${seg.map((x,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:.12rem 0"><i style="width:10px;height:10px;border-radius:3px;background:${PAL[i%6]};flex:none"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.n)}</span><b style="font-weight:600">${Math.round(x.v/total*100)}%</b></div>`).join("")}</div></div>`}
+
+/* ---- Buscador de categorías y aviso de parecidas ---- */
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;const d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+function simCat(){const q=norm($("nc-c").value.trim()),box=$("nc-sim");if(q.length<3||!catalogo){box.innerHTML="";return}
+  const sim=catalogo.categorias.filter(x=>{const n=norm(x.c);return n===q||n.indexOf(q)>=0||(n.length>=4&&q.indexOf(n)>=0)||lev(n,q)<=2}).slice(0,6);
+  box.innerHTML=sim.length?`<div style="font-size:.8rem;color:var(--warn);margin-top:6px">Ya existe algo parecido. ¿Quiere usar una de estas?</div><div class="chips" style="margin-top:4px">`+sim.map(x=>`<button type="button" class="chip" data-use="${esc(x.g)}|${esc(x.c)}">${ico(x.g,x.c)} ${esc(x.c)}<br><small>${esc(x.g)}</small></button>`).join("")+"</div>":""}
+$("nc-c").oninput=simCat;
+$("catq").oninput=()=>pintaCats();
+document.addEventListener("click",e=>{const u=e.target.closest("#nc-sim [data-use]"),n=e.target.closest("#cats [data-new]");
+  if(u){const p=u.dataset.use.split("|");sel={g:p[0],c:p[1]};$("nuevaCat").style.display="none";$("catq").value="";pintaCats();msg("Usará la categoría existente: "+p[1],2)}
+  if(n){abreNuevaCat();$("nc-c").value=$("catq").value.trim();simCat()}});
 
 /* ---- navegación y configuración ---- */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
