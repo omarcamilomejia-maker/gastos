@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-13.1">
+<meta name="app-version" content="2026-11-14.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -156,6 +156,8 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 .kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}
 .dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
+#net{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--warn-t);color:var(--warn);text-align:center;font-size:.78rem;font-weight:600;padding:calc(.3rem + env(safe-area-inset-top)) .5rem .3rem;display:none;cursor:pointer}body.net-on{padding-top:calc(1.9rem + env(safe-area-inset-top))}
+
 </style>
 </head>
 <body>
@@ -171,6 +173,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
   <div class="sp-pasos" id="sp-pasos" aria-hidden="true"></div>
   <button class="sp-enter" id="enter" type="button">Ingresar</button>
 </div>
+<div id="net" role="status" aria-live="polite"></div>
 <div id="lock"><h1 id="ltit">Ingrese su PIN</h1><div class="dots" id="dots"></div><div class="msg" id="lmsg"></div><div class="pk" id="pk"></div><button class="save sec" id="bio" type="button" style="display:none;width:auto;padding:.7rem 1.6rem;margin:0">Usar huella</button><button class="lk" id="forgot" type="button">Olvidé mi PIN</button></div>
 
 <div class="wrap">
@@ -296,7 +299,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-13.1";
+const APP_V="2026-11-14.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -416,7 +419,7 @@ const cola=()=>{try{return JSON.parse(rd("g_cola")||"[]")}catch(e){return[]}};
 const guardaCola=a=>wr("g_cola",JSON.stringify(a));
 async function vaciarCola(){const q=cola();if(!q.length)return 0;const resto=[];let n=0;
   for(const o of q){try{await post(o);n++}catch(e){if(e.api&&e.message.indexOf("Ocupado")<0)continue;resto.push(o)}}
-  guardaCola(resto);return n}
+  guardaCola(resto);netEst();return n}
 
 /* ---- categorías ---- */
 async function cargaCatalogo(){
@@ -488,7 +491,7 @@ $("save").onclick=async()=>{
   try{await post(o);msg("Guardado ✓ "+fmt(valor)+" · "+sel.c,2);sonidoGuardado();limpia();MOV=null;HIS=null;if(pv){pagoVenc=null;cierraPago(pv,o.id)}}
   catch(e){
     if(e.api){msg(e.message,1)}
-    else{const q=cola();q.push(o);if(guardaCola(q)){msg("Sin conexión: quedó en cola ("+q.length+"). Se envía al abrir con señal.",2);limpia()}else msg("Sin conexión y no se pudo guardar en cola",1)}
+    else{const q=cola();q.push(o);if(guardaCola(q)){msg("Sin conexión: quedó en cola ("+q.length+"). Se envía al abrir con señal.",2);limpia();netEst()}else msg("Sin conexión y no se pudo guardar en cola",1)}
   }
   $("save").disabled=false;
 };
@@ -1046,6 +1049,16 @@ function abreProyecto(a){
   $("ed-x").onclick=cierraEd;
   $("edit-body").onclick=e=>{if(e.target.closest("[data-dnew]"))formDoc(a.id)}}
 
+
+/* ---- Estado de conexión, cola y modo sin internet ---- */
+function netEst(){const off=!navigator.onLine,n=cola().length,b=$("net");b.style.display=(off||n)?"block":"none";
+  b.textContent=(off?"Sin conexión":"Con conexión")+(n?" · "+n+" pendiente"+(n>1?"s":"")+" de enviar":"")+(off?" · puede seguir registrando":"")+(!off&&n?" · toque para enviar":"");document.body.classList.toggle("net-on",off||n>0)}
+$("net").onclick=async()=>{if(!navigator.onLine||!LLAVE)return;try{await vaciarCola();MOV=null;HIS=null}catch(e){}netEst()};
+window.addEventListener("offline",netEst);
+window.addEventListener("online",()=>{if(LLAVE)vaciarCola().then(n=>{if(n){MOV=null;HIS=null}netEst()}).catch(netEst);else netEst()});
+setInterval(()=>{if(navigator.onLine&&LLAVE&&cola().length)vaciarCola().then(netEst).catch(()=>{})},60000);
+netEst();
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
 /* ---- navegación y configuración ---- */
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
