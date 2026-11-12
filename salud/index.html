@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-12.1">
+<meta name="app-version" content="2026-11-12.2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -145,6 +145,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 .kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}.cap{font-size:.72rem;color:var(--ink2);text-align:center;margin-top:-2px}
 .dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
+.rseg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--key);padding:4px;border-radius:.95rem;margin-bottom:10px}.rseg button{border:0;background:none;padding:.6rem .1rem;border-radius:.75rem;font-size:.8rem;color:var(--ink2)}.rseg button.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh)}
 </style>
 </head>
 <body>
@@ -170,14 +171,15 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 <section class="pg on" id="pg-reg">
   <div class="card" id="hoyc" style="display:none"><h2>Hoy</h2><div id="hoyr" style="display:flex;gap:10px;align-items:center;justify-content:space-around"></div><p id="hoyt" style="margin:.4rem 0 0;font-size:.78rem;color:var(--ink2)"></p></div>
   <div class="card"><h2>¿De qué día es el registro?</h2><div class="btns" id="fechas"></div><input id="fecha" type="date" style="display:none;margin-top:8px" aria-label="Fecha del registro"></div>
+  <div class="rseg" id="rseg" role="tablist"><button type="button" data-rs="peso">Peso</button><button type="button" data-rs="act">Actividad</button><button type="button" data-rs="ten">Tensión</button><button type="button" data-rs="com">Comida</button></div>
 
-  <div class="card"><h2>Peso</h2>
+  <div class="card rc" id="rc-peso"><h2>Peso</h2>
     <div class="g2"><div><label for="peso">Peso (kg)</label><input id="peso" type="number" inputmode="decimal" step="0.1" placeholder="88,0"></div>
       <div><label for="hpeso">Hora</label><input id="hpeso" type="time"></div></div>
     <label>Energía en este momento (opcional)</label><div class="btns" id="e-peso"></div>
     <button class="save" id="g-peso">Guardar peso</button><div class="msg" id="m-peso"></div></div>
 
-  <div class="card"><h2>Actividad</h2>
+  <div class="card rc" id="rc-act"><h2>Actividad</h2>
     <div class="btns" id="acts"></div>
     <input id="otra" placeholder="¿Qué actividad?" style="display:none;margin-top:8px">
     <label>Intensidad</label><div class="btns" id="inten"></div>
@@ -187,7 +189,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
     <label>Energía después (opcional)</label><div class="btns" id="e-act"></div>
     <button class="save" id="g-act">Guardar actividad</button><div class="msg" id="m-act"></div></div>
 
-  <div class="card"><h2>Tensión</h2>
+  <div class="card rc" id="rc-ten"><h2>Tensión</h2>
     <div class="g3"><div><label for="sis">Sistólica</label><input id="sis" type="number" inputmode="numeric" placeholder="120"></div>
       <div><label for="dia">Diastólica</label><input id="dia" type="number" inputmode="numeric" placeholder="80"></div>
       <div><label for="pul">Pulso</label><input id="pul" type="number" inputmode="numeric" placeholder="70"></div></div>
@@ -196,7 +198,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
     <label>Energía en este momento (opcional)</label><div class="btns" id="e-ten"></div>
     <button class="save" id="g-ten">Guardar tensión</button><div class="msg" id="m-ten"></div></div>
 
-  <div class="card"><h2>Comida</h2>
+  <div class="card rc" id="rc-com"><h2>Comida</h2>
     <div class="btns" id="cms"></div>
     <label for="desc">¿Qué comió?</label><textarea id="desc" placeholder="Ej: pechuga a la plancha, arroz integral, ensalada"></textarea>
     <div class="g2"><div><label for="kcal">Calorías (kcal)</label><input id="kcal" type="number" inputmode="numeric" placeholder="opcional"></div>
@@ -287,7 +289,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-12.1";
+const APP_V="2026-11-12.2";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -497,7 +499,7 @@ function iaMuestra(r,dia,fuente){
     if(x.sr)rec=x.sr;
     $("desc").value=x.descripcion||x.identificado||"";$("kcal").value=x.kcal===""?"":x.kcal;$("prot").value=x.prot===""?"":x.prot;
     iaExtra={semaforo:x.semaforo,sodio:x.sodio,ajuste:x.ajuste,notas_ia:x.notas};
-    pintaTodo();$("ia-card").innerHTML="";IAR=null;msg("mc","Registro llenado. Revise y toque «Guardar comida».","ok");$("gc").scrollIntoView({block:"center"})}}
+    verReg("com");pintaTodo();$("ia-card").innerHTML="";IAR=null;msg("mc","Registro llenado. Revise y toque «Guardar comida».","ok");$("gc").scrollIntoView({block:"center"})}}
 $("ia-paste").onclick=()=>{$("ia-pegar").style.display=$("ia-pegar").style.display==="none"?"block":"none"};
 $("ia-leer").onclick=()=>{const r=parseRegistro($("ia-txt").value);
   if(!r){$("ia-card").innerHTML='<div class="msg err">No encontré el bloque REGISTRO_APP … FIN_REGISTRO. Copie la respuesta completa, incluido ese bloque.</div>';return}
@@ -748,6 +750,9 @@ const pd=s=>"M"+s.split(" ").join(" L");
 function spark(v,color){if(!v||v.length<2)return "";const mx=Math.max.apply(null,v.concat([1])),mn=Math.min.apply(null,v.concat([0])),W=64,H=22,X=i=>i*(W-2)/(v.length-1)+1,Y=x=>H-2-(x-mn)/(mx-mn||1)*(H-4),c=color||"var(--s1)";
   const pts=v.map((x,i)=>X(i).toFixed(1)+","+Y(x).toFixed(1)).join(" ");
   return `<svg class="spk" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><path class="ln" pathLength="1" d="${pd(pts)}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${X(v.length-1).toFixed(1)}" cy="${Y(v[v.length-1]).toFixed(1)}" r="2" fill="${c}"/></svg>`}
+function verReg(k){["peso","act","ten","com"].forEach(x=>{const c=$("rc-"+x);if(c)c.style.display=x===k?"":"none"});document.querySelectorAll("#rseg button").forEach(b=>b.classList.toggle("on",b.dataset.rs===k));wr("sl_seg",k)}
+$("rseg").onclick=e=>{const b=e.target.closest("[data-rs]");if(b)verReg(b.dataset.rs)};
+verReg(["peso","act","ten","com"].indexOf(rd("sl_seg"))>=0?rd("sl_seg"):"peso");
 /* ===== Semana ===== */
 async function semana(){
   if(!cache)$("kpi").innerHTML=LDR;
