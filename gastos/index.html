@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#16304f">
-<meta name="app-version" content="2026-11-12.1">
+<meta name="app-version" content="2026-11-12.2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -64,7 +64,7 @@ button,.chip,label,select,input{touch-action:manipulation}
 .seg button{border:0;background:none;padding:.5rem;border-radius:.6rem;font-weight:600;font-size:.9rem;color:var(--ink2)}
 .seg .on{background:var(--ink);color:var(--bg)}
 .amt{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding:.1rem .2rem .3rem}
-.amt small{color:var(--ink2);font-size:.8rem}.amt b{font:500 2.3rem/1.1 ui-monospace,Consolas,monospace;letter-spacing:-.02em}
+.amt small{color:var(--ink2);font-size:.8rem}.amt b{font:500 2rem/1.1 ui-monospace,Consolas,monospace;letter-spacing:-.02em}
 .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);display:flex;justify-content:space-between;align-items:center;margin-bottom:-3px}
 .lbl button{border:0;background:none;color:var(--acc);font-weight:600;font-size:.8rem;text-transform:none;letter-spacing:0;padding:0}
 .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -73,8 +73,8 @@ button,.chip,label,select,input{touch-action:manipulation}
 .pay{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.pay .chip{min-height:38px;font-size:.74rem}
 .dates{display:flex;gap:6px}.dates .chip{flex:1;min-height:36px}
 input,select,textarea{width:100%;font:inherit;font-size:16px;padding:.55rem .7rem;border:1px solid var(--rule);border-radius:.7rem;background:var(--surface);color:var(--ink)}
-.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.keys button{border:0;background:var(--key);color:var(--ink);border-radius:.7rem;padding:.45rem 0;font:500 1.15rem ui-monospace,Consolas,monospace;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.keys button{border:0;background:var(--key);color:var(--ink);border-radius:.7rem;padding:.28rem 0;font:500 1.08rem ui-monospace,Consolas,monospace;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .keys button:active{background:var(--rule)}
 .savebar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));background:var(--bg);padding:6px 0 4px;z-index:2;box-shadow:0 -8px 8px -6px var(--bg)}
 .savebar .msg{min-height:0;margin-bottom:2px}
@@ -210,7 +210,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 </section>
 
 <section class="pg" id="pg-hoy">
-  <div class="hero"><small id="hfecha"></small><div class="big" id="htot">$ 0</div><small id="hsub"></small></div>
+  <div class="hero"><small id="hfecha"></small><div class="big" id="htot">$ 0</div><small id="hsub"></small><small id="hmes" style="display:block;margin-top:.25rem"></small></div>
   <div id="hven"></div>
   <div class="list" id="hlist"></div>
   <div class="msg" id="hmsg"></div>
@@ -294,7 +294,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-12.1";
+const APP_V="2026-11-12.2";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -496,7 +496,8 @@ async function hoy(){banVen();
     $("htot").textContent=fmt(dia.reduce((s,m)=>s+m.valor,0));$("hsub").textContent=dia.length+" movimientos hoy";
     const pend=r.movimientos.filter(m=>m.estado==="pendiente").length;
     $("hlist").innerHTML=r.movimientos.slice(0,25).map(m=>`<div class="item"><div><span class="ic">${ico(m.g,m.c)}</span>${esc(m.c)}${m.estado==="pendiente"?' <span class="pill">por confirmar</span>':""}${m.foto?" 📎":""}<br><small>${m.fecha}${m.comercio?" · "+esc(m.comercio):""}${m.medio?" · "+m.medio:""}</small>${m.nota?'<br><small>'+esc(m.nota)+"</small>":""}</div><b>${m.tipo==="Ingreso"?"+":""}${fmt(m.valor)}</b></div>`).join("")||"<div class='item'>Sin movimientos.</div>";
-    $("hmsg").className="msg";$("hmsg").textContent=pend?pend+" por confirmar entre los últimos movimientos.":""}
+    $("hmsg").className="msg";$("hmsg").textContent=pend?pend+" por confirmar entre los últimos movimientos.":"";
+    cargaMov().then(()=>{const d=new Date(),cur=d.getFullYear()*12+d.getMonth()+1,G=MOV.filter(x=>x.t==="G"&&x.mi===cur);$("hmes").textContent="Este mes: "+fmt(sum(G))+" · "+G.length+" movimientos"+(d.getDate()>0?" · promedio diario "+fmt(sum(G)/d.getDate()):"")}).catch(()=>{})}
   catch(e){$("hmsg").textContent=e.message;$("hmsg").className="msg err"}
 }
 
@@ -912,7 +913,7 @@ function formTarea(id,t){
 
 
 /* ---- Estilo: iconos, anillos, calendario, flujo de caja, presupuesto ---- */
-const ICOS=[[/ingres|salari|nomin|honorar|bono/,"💰"],[/merc|super|aliment|abarrot/,"🛒"],[/restaur|domicil|almuerz|cena|cafe|panader|comida/,"🍽"],[/gasolin|combust|parquead|peaje|transpor|taxi|uber|bus|vehic|carro|moto|mecanic|lavad/,"🚗"],[/seguro|soat|poliza/,"🛡"],[/impuest|predial|renta|dian|tribut/,"🏛"],[/salud|medic|farmac|drog|odont|vacun|doctor|terapia/,"💊"],[/educ|colegio|univers|curso|matric|libro|util/,"🎓"],[/ropa|vestid|calzado|zapato/,"👕"],[/internet|telefon|celular/,"📱"],[/energ|luz|agua|gas natural|acueduc|servicio/,"💡"],[/hogar|arriendo|casa|mueble|aseo|hipoteca/,"🏠"],[/entreten|cine|viaje|vacacion|paseo|suscrip|netflix|spotify|diversion/,"🎬"],[/mascota|veterin/,"🐾"],[/regalo|cumple|evento|fiesta/,"🎁"],[/ahorro|inversi/,"📈"],[/trabajo|oficina/,"💼"],[/hij|famil|nino|bebe/,"👨‍👩‍👧"]];
+const ICOS=[[/ingres|salari|nomin|honorar|bono/,"💰"],[/netflix|spotify|hbo|disney|prime video|youtube/,"📺"],[/claude|chatgpt|openai|google|apple|icloud|tecnolog|software|app store/,"💻"],[/internet|telefon|celular|claro|movistar|tigo|plan datos/,"📱"],[/davivienda|bancolombia|occidente|banco|credito|cuota|prestamo|tarjeta|comision|financ|hipoteca/,"🏦"],[/seguro medico|medic|farmac|drog|odont|vacun|doctor|terapia|examen|copago|cita|salud/,"💊"],[/seguro|soat|poliza/,"🛡"],[/impuest|predial|renta|dian|tribut|tramite|document|notaria/,"🏛"],[/pastel|choux|postre|helado|panader/,"🧁"],[/restaur|domicil|almuerz|cena|cafe|comida/,"🍽"],[/merc|super|aliment|abarrot|plaza/,"🛒"],[/peaje|parquead|gasolin|combust|transpor|taxi|uber|bus\b|vehic|carro|moto|mecanic|lavad|tecnomec|revision|mantenimiento|reparac/,"🚗"],[/papeler|libro|unal|univers|colegio|educ|curso|matric|cajasan|util/,"📚"],[/ropa|vestid|calzado|zapato|juguete|panal|bebe|nino/,"👕"],[/viaje|hotel|vuelo|vacacion|paseo/,"✈️"],[/entreten|cine|diversion|suscrip/,"🎬"],[/gas natural|\bgas\b/,"🔥"],[/energ|luz|agua|acueduc|servicio/,"💡"],[/apoyo|empleada|aseo|hogar|arriendo|casa|mueble/,"🏠"],[/mascota|veterin/,"🐾"],[/regalo|cumple|evento|fiesta/,"🎁"],[/ahorro|inversi/,"📈"],[/trabajo|oficina/,"💼"],[/hij|famil/,"👨‍👩‍👧"]];
 const ico=(g,c)=>{const s=norm(g+" "+c);for(let i=0;i<ICOS.length;i++)if(ICOS[i][0].test(s))return ICOS[i][1];return "🧾"};
 function anillo(p,o){o=o||{};const r=38,c=2*Math.PI*r,v=Math.max(0,Math.min(p,1));
   return `<svg viewBox="0 0 100 100" width="${o.size||96}" height="${o.size||96}" role="img" aria-label="${esc(o.aria||"")}"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--grid)" stroke-width="9"/><circle class="rg" cx="50" cy="50" r="${r}" fill="none" stroke="${p>1?"var(--crit)":(o.color||"var(--acc)")}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" transform="rotate(-90 50 50)" style="--c:${c};--o:${c*(1-v)}"/><text x="50" y="${o.sub?48:56}" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">${o.txt}</text>${o.sub?`<text x="50" y="63" text-anchor="middle" font-size="9" fill="var(--ink2)">${o.sub}</text>`:""}</svg>`}
