@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-09.2">
+<meta name="app-version" content="2026-11-12.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -143,7 +143,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 .cd{border:0;border-radius:.6rem;background:var(--bg);padding:.2rem 0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
 .cd i{font-style:normal;font-size:.82rem;font-weight:600}.cd small{font-size:.56rem;color:var(--ink2)}.cd.on{outline:2px solid var(--acc)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
-.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.65rem;opacity:.95;width:64px;height:22px}
+.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}.cap{font-size:.72rem;color:var(--ink2);text-align:center;margin-top:-2px}
 .dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
 </style>
 </head>
@@ -287,7 +287,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-09.2";
+const APP_V="2026-11-12.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -515,14 +515,14 @@ $("ia-go").onclick=async()=>{const t=$("desc").value.trim();if(!t&&!fotoB64)retu
 
 /* ===== Gráficas ===== */
 function linea(el,series,opts){
-  const W=Math.max(el.clientWidth,300),H=opts.h||190,L=34,R=8,T=8,B=22;
+  const W=Math.max(el.clientWidth,300),H=opts.h||190,L=40,R=8,T=8,B=22;
   const xs=series.flatMap(s=>s.pts.map(p=>p[0])),ys=series.flatMap(s=>s.pts.map(p=>p[1]));
   if(!xs.length){el.innerHTML='<div class="msg">Aún no hay datos en este periodo.</div>';return}
   let x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs);if(x1===x0)x1=x0+1;
   let y0=Math.floor(Math.min.apply(null,ys)-1),y1=Math.ceil(Math.max.apply(null,ys)+1);if(opts.minY!==undefined)y0=Math.min(y0,opts.minY);if(opts.maxY!==undefined)y1=Math.max(y1,opts.maxY);
   const X=x=>L+(x-x0)/(x1-x0)*(W-L-R),Y=y=>T+(1-(y-y0)/(y1-y0))*(H-T-B);
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.aria}">`;
-  for(let k=0;k<=4;k++){const v=y0+(y1-y0)*k/4,y=Y(v);s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${L-4}" y="${y+3}" text-anchor="end">${Math.round(v*10)/10}</text>`}
+  for(let k=0;k<=4;k++){const v=y0+(y1-y0)*k/4,y=Y(v);s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${L-4}" y="${y+3}" text-anchor="end">${y1-y0>=20?Math.round(v):Math.round(v*10)/10}</text>`}
   const dd=n=>{const d=new Date(n*864e5);return d.getUTCDate()+"/"+(d.getUTCMonth()+1)};
   [x0,(x0+x1)/2,x1].forEach((x,i)=>{s+=`<text x="${X(x)}" y="${H-6}" text-anchor="${i===0?"start":i===2?"end":"middle"}">${dd(Math.round(x))}</text>`});
   series.forEach(se=>{
@@ -723,7 +723,7 @@ async function pintaHoy(){
     if(!ob)return;let k=0,p=0,e=0;
     D.com.filter(x=>x.fecha===f).forEach(x=>{k+=Number(x.kcal_est)||0;p+=Number(x.proteina_g_est)||0});
     D.med.filter(x=>x.fecha===f&&Number(x.actividad_min)>0).forEach(x=>{e+=x.kcal_gasto!==""&&x.kcal_gasto!==undefined&&x.kcal_gasto!==null?Number(x.kcal_gasto):kcalEj(String(x.actividad).toLowerCase(),x.intensidad||"moderada",Number(x.actividad_min),kgRef())});
-    $("hoyr").innerHTML=anillo(k/ob,{txt:Math.round(ob-k+e),sub:"kcal restantes",aria:"Calorías restantes de hoy"})+(pob?anillo(p/pob,{txt:Math.round(p)+" g",sub:"de "+pob+" g proteína",color:"var(--s2)",aria:"Proteína de hoy"}):"");
+    $("hoyr").innerHTML=`<div>${anillo(k/ob,{txt:Math.round(ob-k+e),sub:"kcal",aria:"Calorías restantes de hoy"})}<div class="cap">restantes hoy</div></div>`+(pob?`<div>${anillo(p/pob,{txt:Math.round(p)+" g",sub:"de "+pob+" g",color:"var(--s2)",aria:"Proteína de hoy"})}<div class="cap">proteína</div></div>`:"");
     $("hoyt").textContent="Consumido "+Math.round(k)+" de "+ob+" kcal"+(e?" · ejercicio ≈ "+Math.round(e)+" kcal":"")+". Estimación aproximada.";
     $("hoyc").style.display="block"}catch(x){}}
 function pintaSemana(dias){
@@ -738,7 +738,7 @@ function pintaMetas(D){
   const m=D.meta,r=D.res,u=r.ultimo_peso;if(!m||u===null||u===undefined)return;
   const hitos=[];for(let w=m.peso_inicial-2;w>m.meta_kg;w-=2)hitos.push(w);hitos.push(m.meta_kg);
   let prox=true;$("metas").innerHTML=hitos.map(w=>{const ok=u<=w,esp=!ok&&prox;if(esp)prox=false;
-    return `<div class="row" style="padding:.25rem 0"><span>${ok?"✅":esp?"🎯":"▫️"} ${w} kg</span><span style="color:var(--ink2)">${ok?"logrado":esp?"faltan "+f1(u-w)+" kg":""}</span></div>`}).join("");
+    return `<div class="row" style="padding:.25rem 0"><span>${ok?"✅":esp?"🎯":"○"} ${w} kg</span><span style="color:var(--ink2)">${ok?"logrado":esp?"faltan "+f1(u-w)+" kg":""}</span></div>`}).join("");
   const pts=r.serie_peso||[],last=pts[pts.length-1];
   $("cambios").innerHTML=last?[7,14,30,90].map(d=>{const lim=dIso(di(last.f)-d),ref=pts.find(p=>p.f>=lim),v=ref&&ref.f<last.f?last.mm7-ref.mm7:null;
     return `<div class="row" style="padding:.25rem 0"><span>Últimos ${d} días</span><b>${v===null?"—":(v>0?"▲ ":v<0?"▼ ":"")+f1(Math.abs(v))+" kg"}</b></div>`}).join("")+'<p class="msg" style="color:var(--ink2)">Cambio del promedio móvil de 7 días, para suavizar el ruido diario.</p>':""}
