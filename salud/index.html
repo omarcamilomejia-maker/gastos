@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Health">
 <meta name="theme-color" content="#1f6a9f">
-<meta name="app-version" content="2026-11-14.1">
+<meta name="app-version" content="2026-11-18.1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -75,7 +75,7 @@ textarea{min-height:64px;resize:vertical}
 .save{width:100%;border:0;background:var(--acc);color:var(--on);border-radius:.9rem;padding:.8rem;font-size:1rem;font-weight:700;margin-top:.7rem;cursor:pointer}
 .save.sec{background:var(--key);color:var(--ink)}
 .msg{font-size:.85rem;margin-top:.4rem;min-height:1.2em}.msg.err{color:var(--crit)}.msg.ok{color:var(--good)}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(6,1fr);background:var(--surface);border-top:1px solid var(--rule);padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:5}
 .tabs button{border:0;background:none;color:var(--ink2);font-size:.72rem;padding:.3rem;cursor:pointer}.tabs button b{display:block;font-size:1.15rem;font-weight:500}
 .tabs .on{color:var(--acc);font-weight:700}
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpi>div{background:var(--bg);border-radius:.7rem;padding:.55rem .7rem}
@@ -143,7 +143,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 .cd{border:0;border-radius:.6rem;background:var(--bg);padding:.2rem 0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
 .cd i{font-style:normal;font-size:.82rem;font-weight:600}.cd small{font-size:.56rem;color:var(--ink2)}.cd.on{outline:2px solid var(--acc)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
-.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}.cap{font-size:.72rem;color:var(--ink2);text-align:center;margin-top:-2px}
+.kpi>div{position:relative}.spk{position:absolute;right:.6rem;top:.35rem;opacity:.95;width:56px;height:16px}#bioc{display:none!important}.mini{border:1px solid var(--rule);background:var(--key);color:var(--ink);border-radius:.6rem;padding:.25rem .6rem;font-size:.75rem;cursor:pointer}.cap{font-size:.72rem;color:var(--ink2);text-align:center;margin-top:-2px}
 .dnt{animation:donut .9s var(--ez) both}@keyframes donut{from{stroke-dasharray:0 239}to{stroke-dasharray:var(--l) var(--r)}}
 .rseg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--key);padding:4px;border-radius:.95rem;margin-bottom:10px}.rseg button{border:0;background:none;padding:.6rem .1rem;border-radius:.75rem;font-size:.8rem;color:var(--ink2)}.rseg button.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh)}
 #net{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--warn-t);color:var(--warn);text-align:center;font-size:.78rem;font-weight:600;padding:calc(.3rem + env(safe-area-inset-top)) .5rem .3rem;display:none;cursor:pointer}body.net-on{padding-top:calc(1.9rem + env(safe-area-inset-top))}
@@ -254,6 +254,16 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 </section>
 <div id="edit"><div id="edit-body"></div></div>
 
+<section class="pg" id="pg-med">
+  <div class="card"><h2>Bitácora médica</h2><div class="btns" id="med-pers"></div>
+    <button class="save" id="med-nuevo" type="button">🤒 Me sentí mal</button>
+    <div class="msg" style="color:var(--ink2)">Registro voluntario y privado. No es consejo médico ni un diagnóstico.</div></div>
+  <div id="med-act"></div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><button type="button" class="mini" id="mc-p" aria-label="Mes anterior">‹</button><b id="mc-t" style="font-size:.95rem"></b><button type="button" class="mini" id="mc-n" aria-label="Mes siguiente">›</button></div><div id="med-cal"></div><div class="msg" id="mc-h" style="color:var(--ink2)"></div></div>
+  <div class="card"><h2>Conteos</h2><div class="btns" id="med-per"></div><div id="med-stats" style="margin-top:.5rem"></div></div>
+  <div class="card"><h2>Episodios</h2><div id="med-list"></div></div>
+</section>
+
 <section class="pg" id="pg-sem">
   <div class="card"><h2>Hacia la meta</h2><div class="kpi" id="kpi"></div><div id="meta"></div></div>
   <div class="card"><h2>Últimos 7 días</h2><div id="sem"></div></div>
@@ -278,7 +288,7 @@ svg rect[data-b]{transform-box:fill-box;transform-origin:bottom;animation:growY 
 </section>
 </div>
 
-<nav class="tabs"><button class="on" data-t="reg"><b><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></b>Registrar</button><button data-t="ana"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></b>Análisis</button><button data-t="his"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg></b>Historial</button><button data-t="sem"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></b>Semana</button><button data-t="cfg"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg></b>Conexión</button></nav>
+<nav class="tabs"><button class="on" data-t="reg"><b><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></b>Registrar</button><button data-t="ana"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></b>Análisis</button><button data-t="his"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg></b>Historial</button><button data-t="med"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></b>Médico</button><button data-t="sem"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></b>Semana</button><button data-t="cfg"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg></b>Conexión</button></nav>
 
 <script>
 const PFX="sl";
@@ -292,7 +302,7 @@ const LDR='<div class="ldr" role="status" aria-label="Cargando datos"><div class
 let ldrN=0;setInterval(()=>{const els=document.querySelectorAll(".ldr-r");if(!els.length)return;ldrN=(ldrN+1)%10;const k=Math.min(ldrN,7);
   els.forEach(el=>{if(el.dataset.k===String(k))return;el.dataset.k=k;el.innerHTML=ldrHtml(k)})},450);
 /* Actualización automática: si hay una versión nueva publicada, la carga una vez (evita quedarse con una copia vieja) */
-const APP_V="2026-11-14.1";
+const APP_V="2026-11-18.1";
 (async()=>{try{const r=await fetch(location.pathname+"?chk="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-version" content="([^"]+)"/.exec(t);
   if(m&&m[1]!==APP_V){const k="upd"+m[1];let hecho="";try{hecho=sessionStorage.getItem(k)}catch(e){}if(!hecho){try{sessionStorage.setItem(k,"1")}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(m[1]))}}}catch(e){}})();
 const splashT0=Date.now();
@@ -756,6 +766,114 @@ function spark(v,color){if(!v||v.length<2)return "";const mx=Math.max.apply(null
 function verReg(k){["peso","act","ten","com"].forEach(x=>{const c=$("rc-"+x);if(c)c.style.display=x===k?"":"none"});document.querySelectorAll("#rseg button").forEach(b=>b.classList.toggle("on",b.dataset.rs===k));wr("sl_seg",k)}
 $("rseg").onclick=e=>{const b=e.target.closest("[data-rs]");if(b)verReg(b.dataset.rs)};
 verReg(["peso","act","ten","com"].indexOf(rd("sl_seg"))>=0?rd("sl_seg"):"peso");
+/* ===== Bitácora médica (voluntaria; no es consejo médico) ===== */
+Object.assign(ERR,{persona:"Persona no válida",sintomas:"Elija al menos un síntoma",fin:"El fin no puede ser anterior al inicio",temp:"Temperatura fuera de rango (34 a 43)",duplicado:"Ya existe una persona con ese nombre"});
+const SINT=["Dolor de cabeza","Gripa o resfriado","Fiebre","Dolor de garganta","Tos","Congestión","Malestar estomacal","Dolor de espalda","Dolor muscular o articular","Otro dolor","Cansancio general","Mareo","Alergia","Otro"];
+const SINT_NINO=["Irritable","No quiso comer","Vómito"];
+const ZON={"Dolor de cabeza":["Frente","Sienes","Nuca","Coronilla","Lado izquierdo","Lado derecho","Detrás de los ojos"],"Dolor de espalda":["Alta","Media","Baja"],"Malestar estomacal":["Parte alta","Parte baja"],"Dolor muscular o articular":["Cuello","Hombro","Rodilla","Otra"],"Otro dolor":["Oído","Muela o mandíbula","Cuello","Hombro","Rodilla","Otra"]};
+const DESC=["Poco sueño","Estrés","Comida","Clima","Ejercicio","No sé"];
+const REL=[["yo","Yo"],["hija","Hija"],["hijo","Hijo"],["pareja","Pareja"],["otro","Otra persona"]];
+let MED={personas:[{id:"P0",nombre:"Yo",relacion:"yo",activo:true}],episodios:[]},persSel=rd("sl_pers")||"P0",medMes={y:new Date().getFullYear(),m:new Date().getMonth()},medDia="",medPer="90",medSint="";
+const optS=(v,t,s)=>`<option value="${esc(v)}"${s?" selected":""}>${esc(t)}</option>`;
+const abreS=h=>{$("edit-body").innerHTML=h;$("edit").style.display="block";$("edit").scrollTop=0};
+const cierraS=()=>{$("edit").style.display="none"};
+const edMsgS=(t,ok)=>{const m=$("ed-m");if(m){m.textContent=t;m.className="msg"+(ok?" ok":" err")}};
+async function cargaMed(){
+  try{const r=await get("salud_bitacora");MED={personas:r.personas,episodios:r.episodios};wr("sl_med",JSON.stringify(MED));return true}
+  catch(e){try{const c=JSON.parse(rd("sl_med")||"null");if(c){MED=c;return false}}catch(x){}throw e}}
+const epPersona=()=>MED.episodios.filter(e=>e.persona_id===persSel);
+function diasEp(e,hoy){const a=di(e.inicio),b=Math.min(e.fin?di(e.fin):hoy,a+3650),o=[];for(let n=a;n<=b;n++)o.push(n);return o}
+const fCorta=s=>{const p=s.split("-");return +p[2]+" "+["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][+p[1]-1]};
+const rangoTxt=e=>e.fin?(e.fin===e.inicio?fCorta(e.inicio):fCorta(e.inicio)+" al "+fCorta(e.fin)):fCorta(e.inicio)+" · sigue";
+async function medico(){
+  $("med-list").innerHTML=LDR;
+  try{await cargaMed()}catch(e){$("med-list").innerHTML='<div class="msg err">'+esc(e.message)+"</div>";return}
+  if(!MED.personas.some(p=>p.id===persSel))persSel="P0";
+  pintaMed()}
+function pintaMed(){
+  const hoy=di(iso(new Date())),E=epPersona();
+  $("med-pers").innerHTML=MED.personas.filter(p=>p.activo).map(p=>`<button type="button" class="b ${p.id===persSel?"on":""}" data-pp="${esc(p.id)}">${esc(p.nombre)}</button>`).join("")+'<button type="button" class="b" data-pp="__nueva__">＋ Persona</button>';
+  // en curso
+  const act=E.filter(e=>!e.fin);
+  $("med-act").innerHTML=act.length?`<div class="card" style="border-color:var(--acc)"><h2>En curso</h2>`+act.map(e=>`<div class="hr"><div><b>${esc(e.sintomas)}</b><br><small>desde ${fCorta(e.inicio)} · ${hoy-di(e.inicio)+1} día(s)</small></div><div style="text-align:right"><button type="button" data-mr="${esc(e.id)}">Ya me recuperé</button></div></div>`).join("")+"</div>":"";
+  // calendario
+  const first=new Date(medMes.y,medMes.m,1),nd=new Date(medMes.y,medMes.m+1,0).getDate(),off=(first.getDay()+6)%7,pre=medMes.y+"-"+pad(medMes.m+1)+"-",niv={};
+  E.forEach(e=>diasEp(e,hoy).forEach(n=>{const f=dIso(n);if(f.slice(0,7)===pre.slice(0,7))niv[f]=Math.max(niv[f]||0,Number(e.intensidad)||3)}));
+  let h='<div class="cal">'+["L","M","M","J","V","S","D"].map(x=>`<span class="cw">${x}</span>`).join("");for(let i=0;i<off;i++)h+="<span></span>";
+  for(let d=1;d<=nd;d++){const f=pre+pad(d),v=niv[f]||0;h+=`<button type="button" class="cd ${medDia===f?"on":""}" data-mc="${f}" style="${v?`background:color-mix(in srgb,var(--crit) ${20+v*11}%,transparent)`:""}"><i>${d}</i></button>`}
+  $("med-cal").innerHTML=h+"</div>";
+  $("mc-t").textContent=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][medMes.m]+" "+medMes.y;
+  $("mc-h").textContent=Object.keys(niv).length+" día(s) con algún malestar este mes"+(medDia?" · mostrando solo el "+medDia:" · toque un día para ver sus episodios");
+  // conteos
+  btns("med-per",[["30","30 días"],["90","90 días"],["y","Este año"],["0","Todo"]],()=>medPer,v=>{medPer=v||"90";pintaMed()});
+  const d0=medPer==="0"?-1e9:medPer==="y"?di(new Date().getFullYear()+"-01-01"):hoy-Number(medPer)+1,porS={},cualq=new Set();
+  E.forEach(e=>{const ds=diasEp(e,hoy).filter(n=>n>=d0&&n<=hoy);ds.forEach(n=>cualq.add(n));e.sintomas.split(", ").filter(Boolean).forEach(s=>{const o=porS[s]||(porS[s]={dias:new Set(),n:0,zon:{}});ds.forEach(n=>o.dias.add(n));if(ds.length){o.n++;e.zonas.split(", ").filter(Boolean).forEach(z=>o.zon[z]=(o.zon[z]||0)+ds.length)}})});
+  const ult={};E.forEach(e=>e.sintomas.split(", ").filter(Boolean).forEach(s=>{if(!ult[s]||e.inicio>ult[s].inicio)ult[s]=e}));
+  const rows=Object.keys(porS).filter(s=>porS[s].dias.size).sort((a,b)=>porS[b].dias.size-porS[a].dias.size);
+  const span=medPer==="0"?null:hoy-d0+1;
+  $("med-stats").innerHTML=(cualq.size?`<div style="font-size:.9rem;margin:.4rem 0"><b>${cualq.size}</b> día(s) con algún malestar${span?" de "+span:""}.</div>`:'<div class="msg">Sin malestares registrados en este periodo.</div>')+rows.map(s=>`<div class="row" style="padding:.3rem 0;cursor:pointer" data-ms="${esc(s)}"><span>${esc(s)}</span><b>${porS[s].dias.size} día(s) · ${porS[s].n} ep.</b></div>`).join("")+
+    (medSint&&porS[medSint]?`<div class="card" style="margin:.5rem 0 0;background:var(--bg)"><b>${esc(medSint)}</b><p style="margin:.3rem 0;font-size:.85rem">Último episodio: ${ult[medSint]?rangoTxt(ult[medSint])+" ("+diasEp(ult[medSint],hoy).length+" día(s))":"—"}</p>`+(Object.keys(porS[medSint].zon).length?'<div style="font-size:.85rem">Dónde:</div>'+Object.keys(porS[medSint].zon).sort((a,b)=>porS[medSint].zon[b]-porS[medSint].zon[a]).map(z=>`<div class="row" style="padding:.15rem 0"><span>${esc(z)}</span><span>${porS[medSint].zon[z]} día(s)</span></div>`).join(""):"")+"</div>":"");
+  // lista
+  const L=E.filter(e=>!medDia||diasEp(e,hoy).some(n=>dIso(n)===medDia)).sort((a,b)=>a.inicio<b.inicio?1:-1).slice(0,40);
+  $("med-list").innerHTML=L.map(e=>`<div class="hr"><div><b>${rangoTxt(e)}</b><br>${esc(e.sintomas)}${e.zonas?" · "+esc(e.zonas):""}${e.intensidad?" · intensidad "+e.intensidad+"/5":""}${e.temp_c?" · "+e.temp_c+" °C":""}${e.medicamento?"<br><small>Tomó: "+esc(e.medicamento)+"</small>":""}${e.notas?"<br><small>"+esc(e.notas)+"</small>":""}</div><button type="button" data-me="${esc(e.id)}">Editar</button></div>`).join("")||'<div class="msg">Aún no hay episodios. Toque «Me sentí mal» cuando lo necesite.</div>'}
+$("pg-med").onclick=async e=>{
+  const pp=e.target.closest("[data-pp]"),mc=e.target.closest("[data-mc]"),ms=e.target.closest("[data-ms]"),me=e.target.closest("[data-me]"),mr=e.target.closest("[data-mr]");
+  if(pp){if(pp.dataset.pp==="__nueva__")return abrePersona();persSel=pp.dataset.pp;wr("sl_pers",persSel);medDia="";medSint="";pintaMed()}
+  if(mc){medDia=medDia===mc.dataset.mc?"":mc.dataset.mc;pintaMed()}
+  if(ms){medSint=medSint===ms.dataset.ms?"":ms.dataset.ms;pintaMed()}
+  if(me)abreEpisodio(me.dataset.me);
+  if(mr){const x=MED.episodios.find(z=>z.id===mr.dataset.mr);if(!x)return;
+    if(!confirm("¿Marcar «"+x.sintomas+"» como recuperado hoy?"))return;
+    try{await post({accion:"salud_episodio",id:x.id,persona_id:x.persona_id,inicio:x.inicio,fin:iso(new Date()),sintomas:x.sintomas,zonas:x.zonas,intensidad:x.intensidad,temp_c:x.temp_c,desencadenante:x.desencadenante,medicamento:x.medicamento,reposo:x.reposo,notas:x.notas});sonidoGuardado();await cargaMed();pintaMed()}catch(er){alert(er.message)}}};
+$("mc-p").onclick=()=>{medMes.m--;if(medMes.m<0){medMes.m=11;medMes.y--}pintaMed()};
+$("mc-n").onclick=()=>{medMes.m++;if(medMes.m>11){medMes.m=0;medMes.y++}pintaMed()};
+$("med-nuevo").onclick=()=>abreEpisodio("");
+function abrePersona(){
+  abreS(`<h2 style="margin-top:0">Nueva persona</h2><label for="pn-n">Nombre</label><input id="pn-n" maxlength="40" placeholder="Ej: Laura"><label for="pn-r">Relación</label><select id="pn-r">${REL.filter(r=>r[0]!=="yo").map(r=>optS(r[0],r[1],false)).join("")}</select>
+    <p style="font-size:.78rem;color:var(--ink2)">Sus registros quedan separados de los suyos y se guardan en este mismo libro privado.</p>
+    <button class="save" id="ed-ok" type="button">Guardar</button><button class="save sec" id="ed-x" type="button">Cancelar</button><div class="msg" id="ed-m"></div>`);
+  $("ed-x").onclick=cierraS;
+  $("ed-ok").onclick=async()=>{if(!$("pn-n").value.trim())return edMsgS("Escriba el nombre");edMsgS("Guardando...",true);
+    try{const r=await post({accion:"salud_persona",nombre:$("pn-n").value,relacion:$("pn-r").value});persSel=r.id;wr("sl_pers",persSel);sonidoGuardado();cierraS();await cargaMed();pintaMed()}catch(er){edMsgS(er.message)}}}
+function abreEpisodio(id){
+  const x=MED.episodios.find(z=>z.id===id)||{id:"",persona_id:persSel,inicio:iso(new Date()),fin:"",sintomas:"",zonas:"",intensidad:"",temp_c:"",desencadenante:"",medicamento:"",reposo:false,notas:""};
+  const per=MED.personas.find(p=>p.id===x.persona_id)||{relacion:"yo",nombre:"Yo"},lista=SINT.concat(/hij/.test(per.relacion)?SINT_NINO:[]);
+  const ss=new Set(x.sintomas?x.sintomas.split(", "):[]),zs=new Set(x.zonas?x.zonas.split(", "):[]),ds=new Set(x.desencadenante?x.desencadenante.split(", "):[]);let it=Number(x.intensidad)||0,otro="";
+  ss.forEach(s=>{if(lista.indexOf(s)<0){otro=s;ss.delete(s);ss.add("Otro")}});
+  abreS(`<h2 style="margin-top:0">${id?"Editar episodio":"Me sentí mal"} · ${esc(per.nombre)}</h2>
+    <label>¿Qué sintió?</label><div class="btns" id="fs"></div><input id="fo" maxlength="40" placeholder="¿Cuál?" style="display:none;margin-top:8px" value="${esc(otro)}">
+    <div id="fzw"><label>¿Dónde?</label><div class="btns" id="fz"></div></div>
+    <label>Intensidad</label><div class="btns" id="fi"></div>
+    <div class="g2"><div><label for="f-ini">Desde</label><input id="f-ini" type="date" value="${x.inicio}"></div><div><label for="f-fin">Hasta</label><input id="f-fin" type="date" value="${x.fin}"></div></div>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f-sigo" style="width:auto"${x.fin?"":" checked"}> Sigo así (no ha terminado)</label>
+    <div class="g2"><div><label for="f-t">Temperatura (°C, opcional)</label><input id="f-t" inputmode="decimal" value="${x.temp_c}"></div><div><label for="f-m">Medicamento tomado</label><input id="f-m" maxlength="80" value="${esc(x.medicamento)}"></div></div>
+    <label>Posible desencadenante</label><div class="btns" id="fd"></div>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f-r" style="width:auto"${x.reposo?" checked":""}> No pude hacer mis actividades</label>
+    <label for="f-n">Notas</label><textarea id="f-n" maxlength="300">${esc(x.notas)}</textarea>
+    <button class="save" id="ed-ok" type="button">Guardar</button>${id?'<button class="save sec" id="ed-del" type="button" style="color:var(--crit)">Eliminar episodio</button>':""}<button class="save sec" id="ed-x" type="button">Cancelar</button><div class="msg" id="ed-m"></div>
+    <p style="font-size:.74rem;color:var(--ink2)">Registro personal y voluntario. No reemplaza una consulta médica.</p>`);
+  const chips=(el,arr,set,dataK)=>{$(el).innerHTML=arr.map(v=>`<button type="button" class="b ${set.has(v)?"on":""}" data-${dataK}="${esc(v)}">${esc(v)}</button>`).join("")};
+  const pinta=()=>{chips("fs",lista,ss,"s");$("fo").style.display=ss.has("Otro")?"block":"none";
+    const zl=[];lista.forEach(s=>{if(ss.has(s)&&ZON[s])ZON[s].forEach(z=>{if(zl.indexOf(z)<0)zl.push(z)})});zs.forEach(z=>{if(zl.indexOf(z)<0)zl.push(z)});
+    $("fzw").style.display=zl.length?"block":"none";chips("fz",zl,zs,"z");chips("fd",DESC,ds,"d");
+    $("fi").innerHTML=[1,2,3,4,5].map(n=>`<button type="button" class="b ${it===n?"on":""}" data-i="${n}">${n===1?"1 · leve":n===5?"5 · muy fuerte":n}</button>`).join("")};
+  pinta();
+  $("edit-body").onclick=e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+    if(d.s!==undefined){ss.has(d.s)?ss.delete(d.s):ss.add(d.s);pinta()}else if(d.z!==undefined){zs.has(d.z)?zs.delete(d.z):zs.add(d.z);pinta()}
+    else if(d.d!==undefined){ds.has(d.d)?ds.delete(d.d):ds.add(d.d);pinta()}else if(d.i!==undefined){it=it===+d.i?0:+d.i;pinta()}};
+  $("ed-x").onclick=cierraS;
+  if($("ed-del"))$("ed-del").onclick=async()=>{if(!confirm("¿Eliminar este episodio? Queda anotado en la hoja Auditoría."))return;try{await post({accion:"salud_episodio",id:x.id,persona_id:x.persona_id,borrar:true});cierraS();await cargaMed();pintaMed()}catch(er){edMsgS(er.message)}};
+  $("ed-ok").onclick=async()=>{
+    const lis=Array.from(ss).map(s=>s==="Otro"?($("fo").value.trim()||"Otro"):s);if(!lis.length)return edMsgS("Elija al menos un síntoma");
+    const o={accion:"salud_episodio",id:x.id||nuevoId("se"),persona_id:x.persona_id,inicio:$("f-ini").value,fin:$("f-sigo").checked?"":$("f-fin").value,sintomas:lis.join(", "),zonas:Array.from(zs).join(", "),intensidad:it||undefined,
+      temp_c:$("f-t").value.replace(",",".").trim()||undefined,desencadenante:Array.from(ds).join(", "),medicamento:$("f-m").value.trim()||undefined,reposo:$("f-r").checked,notas:$("f-n").value.trim()||undefined};
+    if(!o.inicio)return edMsgS("Elija la fecha de inicio");edMsgS("Guardando...",true);
+    try{const rq=await enviaOCola(o);sonidoGuardado();cierraS();
+      if(rq.cola){const loc={id:o.id,persona_id:o.persona_id,inicio:o.inicio,fin:o.fin,sintomas:o.sintomas,zonas:o.zonas,intensidad:o.intensidad||"",temp_c:o.temp_c||"",desencadenante:o.desencadenante,medicamento:o.medicamento||"",reposo:o.reposo,notas:o.notas||""},i=MED.episodios.findIndex(z=>z.id===o.id);if(i<0)MED.episodios.push(loc);else MED.episodios[i]=loc}
+      else await cargaMed();
+      pintaMed()}catch(er){edMsgS(er.message)}}}
+
+
 /* ===== Semana ===== */
 async function semana(){
   if(!cache)$("kpi").innerHTML=LDR;
@@ -795,7 +913,7 @@ if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.ser
 try{localStorage.setItem("ocarisa_ult",location.pathname)}catch(e){}
 function irA(p){document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x.dataset.t===p));
   document.querySelectorAll(".pg").forEach(x=>x.classList.toggle("on",x.id==="pg-"+p));
-  if(p==="reg"){pintaTodo();prefijaHoras();iaEstado();pintaHoy()}if(p==="ana")analisis();if(p==="sem")semana();if(p==="his")historial()}
+  if(p==="reg"){pintaTodo();prefijaHoras();iaEstado();pintaHoy()}if(p==="ana")analisis();if(p==="sem")semana();if(p==="his")historial();if(p==="med")medico()}
 document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-t]");if(b)irA(b.dataset.t)};
 $("gcfg").onclick=async()=>{
   const url=$("url").value.trim(),llave=$("llave").value.trim(),p1=$("pin1").value,p2=$("pin2").value,m=$("mcfg");m.className="msg err";
